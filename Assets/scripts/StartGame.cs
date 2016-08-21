@@ -94,23 +94,23 @@ public class StartGame : MonoBehaviour
 
     }
 
-    MoveIn1DirectionAgent.Direction getDirection(int options)
+    PacmanMovement.Direction getDirection(int options)
     {
         
         switch (options)
         {
             case 0:
-                return MoveIn1DirectionAgent.Direction.Right;                
+                return PacmanMovement.Direction.Right;                
             case 1:
-                return MoveIn1DirectionAgent.Direction.Left;
+                return PacmanMovement.Direction.Left;
             case 2:
-                return MoveIn1DirectionAgent.Direction.Down;
+                return PacmanMovement.Direction.Down;
             case 3:
-                return MoveIn1DirectionAgent.Direction.Up;
+                return PacmanMovement.Direction.Up;
 
         }
 
-        return MoveIn1DirectionAgent.Direction.Left;
+        return PacmanMovement.Direction.Left;
     }
 
 

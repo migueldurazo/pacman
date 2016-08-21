@@ -179,12 +179,18 @@ public class LevelGenerator : MonoBehaviour {
 		return foodFlags;
 		
 	}
-	
+
+
+
+    
 	void drawLevel(Dictionary<char,Dictionary<char,Dictionary<char,Dictionary<char,GameObject>>>> patterns,
 		List<List<char>> maze, List<List<char>> characters, List<List<bool>> food, GameObject emptySquare,
 			GameObject pacman, GameObject pacdot ){
-		
-		int height = maze.Count;
+
+        Level level = new Level();
+
+
+        int height = maze.Count;
 		int width = maze[0].Count;
 
         //This data structure helps to see if a piece of food is already in place, initialized to false
@@ -202,16 +208,25 @@ public class LevelGenerator : MonoBehaviour {
 		float currentY = startY;
 		
 		float distance = prefabSize;
+
+        int boardXCoordinate = 0;
+        
 		
 		for( int i = 0 ; i < maze.Count ; i++ ){
 			
 			currentX = startX;
-			
-			for( int j = 0 ; j < maze[i].Count ; j++ ){
+
+            List<Place> boardRow = new List<Place>();
+
+            int boardYCoordinate = 0;
+
+            for ( int j = 0 ; j < maze[i].Count ; j++ ){
 				
 				char current = maze[i][j];
 				
 				if( current != 'e' ){
+
+                    //valid area
 					
 					GameObject prefab = emptySquare;
 					
@@ -238,34 +253,52 @@ public class LevelGenerator : MonoBehaviour {
 						
 					}
 
-                    
-					
+					//Current prefab position
 					Vector3 position = new Vector3 (currentX, currentY, 0f);
 					Instantiate (prefab,position, Quaternion.identity);
-					
-					if( characters[i][j] == 'P' && characters[i][j+1] == 'P' && characters[i+1][j]=='P'
-						&& characters[i+1][j+1] == 'P'){
-						
-						Vector3 pacPos = new Vector3 (currentX+prefabSize/2f, currentY-prefabSize/2f, 0f);
-						
-						Debug.Log("Posicion pacman: "+pacPos);
-						
-                        GameObject pacmanInstance = (GameObject)Instantiate (pacman, pacPos, Quaternion.identity);
+                    
+                    //use to instantiate pacman, pacdots and ghosts
+                    Vector3 entityPosition = new Vector3(currentX + prefabSize / 2f, currentY - prefabSize / 2f, 0f);
 
-                        pacmanInstance.GetComponent<PacmanMove>().setAgent(agent);
-						
-					}
+                    Place place = new Place(false);
+                    place.Level = level;
+                    place.X = boardXCoordinate;
+                    place.Y = boardYCoordinate++;
+                    
 
                     if (maze[i][j] == ' ' && maze[i][j + 1] == ' ' && maze[i + 1][j] == ' '
                         && maze[i + 1][j + 1] == ' ')
                     {
 
-
+                        place.Valid = true;
 
                         //Found an empty spot where pacman can be placed
                         //Use a structure to store pacman position and coordinates, new object required
 
+                        place.PacmanPosition = entityPosition;
+
                     }
+
+                    boardRow.Add(place);
+
+                    if ( characters[i][j] == 'P' && characters[i][j+1] == 'P' && characters[i+1][j]=='P'
+						&& characters[i+1][j+1] == 'P'){
+						
+						//Vector3 pacPos = new Vector3 (currentX+prefabSize/2f, currentY-prefabSize/2f, 0f);						
+						
+                        GameObject pacmanInstance = (GameObject)Instantiate (pacman, entityPosition, Quaternion.identity);
+
+                        PacmanMovement pacmanMovement = pacmanInstance.GetComponent<PacmanMovement>();
+
+                        pacmanMovement.Agent = agent;
+
+                        pacmanMovement.Level = level;
+
+                        pacmanMovement.CurrentPlace = place;
+
+                        Debug.Log(place.X + ":" + place.Y);
+						
+					}
 
                     if (food[i][j] && food[i][j + 1]  && food[i + 1][j] 
                         && food[i + 1][j + 1] && !foodIsPlaced[i][j] && !foodIsPlaced[i][j + 1]
@@ -273,21 +306,24 @@ public class LevelGenerator : MonoBehaviour {
                     {
 
                         //Food gets placed
-                        Vector3 pos = new Vector3(currentX + prefabSize / 2f, currentY - prefabSize / 2f, 0f);
-
-                        GameObject pacdotInstance = (GameObject)Instantiate(pacdot, pos, Quaternion.identity);
+                        
+                        GameObject pacdotInstance = (GameObject)Instantiate(pacdot, entityPosition, Quaternion.identity);
 
                         foodIsPlaced[i][j] = foodIsPlaced[i][j + 1] = foodIsPlaced[i + 1][j] = foodIsPlaced[i + 1][j + 1] = true;
 
-
                     }
 
-                        currentX += distance;
+                    currentX += distance;
 					
 				}
 				
 			}
-			
+
+            if (boardRow.Count > 0)
+            {
+                level.Board.Add(boardRow);
+                boardXCoordinate++;
+            }
 			currentY-=distance;
 			
 		}
