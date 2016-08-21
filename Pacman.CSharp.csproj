@@ -66,6 +66,7 @@
     <Compile Include="Assets\Agents\HumanAgent.cs" />
     <Compile Include="Assets\Agents\IAgent.cs" />
     <Compile Include="Assets\Agents\MoveIn1DirectionAgent.cs" />
+    <Compile Include="Assets\Agents\ReactionAgent.cs" />
     <Compile Include="Assets\scripts\AgentChange.cs" />
     <Compile Include="Assets\scripts\Level Generation\Level.cs" />
     <Compile Include="Assets\scripts\Level Generation\LevelGenerator.cs" />
@@ -78,6 +79,7 @@
   <ItemGroup>
     <None Include="Assets\Resources\levels\basic1.txt" />
     <None Include="Assets\Resources\levels\minimaxClassic.txt" />
+    <None Include="Assets\Resources\levels\oddSearch.txt" />
     <None Include="Assets\Resources\levels\testMaze.txt" />
     <None Include="Assets\Resources\levels\testSearch.txt" />
     <None Include="Assets\Resources\levels\trappedClassic.txt" />

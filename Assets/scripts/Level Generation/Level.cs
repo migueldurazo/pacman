@@ -29,6 +29,20 @@ public class Level  {
     public Place getPlace(int x, int y)
     {
 
+        if( x >= Board.Count)
+        {
+
+            return null;
+
+        }
+
+        if( y >=  Board[x].Count)
+        {
+
+            return null;
+
+        }
+
         return Board[x][y];
 
     }

@@ -5,8 +5,9 @@ using System;
 public class HumanAgent : IAgent {
 
   
-    public PacmanMovement.Direction getDirection(Transform pacman)
+    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
     {
+
         if (Input.GetKey(KeyCode.UpArrow))
             return PacmanMovement.Direction.Up;
         if (Input.GetKey(KeyCode.RightArrow))

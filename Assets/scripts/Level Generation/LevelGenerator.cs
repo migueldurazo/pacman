@@ -260,11 +260,27 @@ public class LevelGenerator : MonoBehaviour {
                     //use to instantiate pacman, pacdots and ghosts
                     Vector3 entityPosition = new Vector3(currentX + prefabSize / 2f, currentY - prefabSize / 2f, 0f);
 
-                    Place place = new Place(false);
+                    Place place = new Place();
+                    place.Valid = false;
+                    place.HasFood = false;
                     place.Level = level;
                     place.X = boardXCoordinate;
                     place.Y = boardYCoordinate++;
-                    
+
+                    if (food[i][j] && food[i][j + 1] && food[i + 1][j]
+                        && food[i + 1][j + 1] && !foodIsPlaced[i][j] && !foodIsPlaced[i][j + 1]
+                        && !foodIsPlaced[i + 1][j] && !foodIsPlaced[i + 1][j + 1])
+                    {
+
+                        //Food gets placed
+
+                        GameObject pacdotInstance = (GameObject)Instantiate(pacdot, entityPosition, Quaternion.identity);
+
+                        foodIsPlaced[i][j] = foodIsPlaced[i][j + 1] = foodIsPlaced[i + 1][j] = foodIsPlaced[i + 1][j + 1] = true;
+
+                        place.HasFood = true;
+
+                    }
 
                     if (maze[i][j] == ' ' && maze[i][j + 1] == ' ' && maze[i + 1][j] == ' '
                         && maze[i + 1][j + 1] == ' ')
@@ -300,18 +316,7 @@ public class LevelGenerator : MonoBehaviour {
 						
 					}
 
-                    if (food[i][j] && food[i][j + 1]  && food[i + 1][j] 
-                        && food[i + 1][j + 1] && !foodIsPlaced[i][j] && !foodIsPlaced[i][j + 1]
-                        && !foodIsPlaced[i + 1][j] && !foodIsPlaced[i + 1][j + 1]     )
-                    {
-
-                        //Food gets placed
-                        
-                        GameObject pacdotInstance = (GameObject)Instantiate(pacdot, entityPosition, Quaternion.identity);
-
-                        foodIsPlaced[i][j] = foodIsPlaced[i][j + 1] = foodIsPlaced[i + 1][j] = foodIsPlaced[i + 1][j + 1] = true;
-
-                    }
+                    
 
                     currentX += distance;
 					

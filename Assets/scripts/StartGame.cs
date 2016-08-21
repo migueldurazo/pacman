@@ -52,6 +52,7 @@ public class StartGame : MonoBehaviour
             case 1:
                 maze = LevelGenerator.Maze.Test;
                 break;
+            
 
         }
 
@@ -86,6 +87,10 @@ public class StartGame : MonoBehaviour
                 MoveIn1DirectionAgent agent = new MoveIn1DirectionAgent(getDirection(options));
                 
                 return agent;
+
+            case 2:
+
+                return new ReactionAgent();
                 
                 
         }

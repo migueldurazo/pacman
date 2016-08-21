@@ -13,7 +13,7 @@ public class MoveIn1DirectionAgent : IAgent {
 
     }
 
-    public PacmanMovement.Direction getDirection(Transform pacman)
+    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
     {
         return direction;
     }

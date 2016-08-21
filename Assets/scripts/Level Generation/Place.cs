@@ -4,18 +4,12 @@ using System.Collections;
 public class Place
 {
 
-    public Place(bool valid)
-    {
-
-        this.valid = valid;
-
-    }
-
     private Vector3 pacmanPosition;
-    private bool valid;
+    private bool valid = false;
     private int x;
     private int y;
     private Level level;
+    private bool hasFood = false;
 
     public Vector3 PacmanPosition
     {
@@ -79,6 +73,19 @@ public class Place
         set
         {
             level = value;
+        }
+    }
+
+    public bool HasFood
+    {
+        get
+        {
+            return hasFood;
+        }
+
+        set
+        {
+            hasFood = value;
         }
     }
 

@@ -73,7 +73,7 @@ public class PacmanMovement : MonoBehaviour {
 
         if (Vector2.Distance(dest, (Vector2)transform.position) <= 0.1f)
         {
-            PacmanMovement.Direction direction = Agent.getDirection(transform);
+            PacmanMovement.Direction direction = Agent.getDirection(transform, this);
 
             if( direction != Direction.Idle)
             {
@@ -91,6 +91,8 @@ public class PacmanMovement : MonoBehaviour {
                 dest = (Vector2)transform.position + directionVector;
 
                 currentPlace = currentPlace.getPlaceByMovement(direction);
+
+                currentPlace.HasFood = false;
 
             }
 

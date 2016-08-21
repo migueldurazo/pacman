@@ -8,7 +8,5 @@ public class Pacdot : MonoBehaviour {
         if (co.name.StartsWith("Pacman"))
             Destroy(gameObject);
 
-        Debug.Log( co.name+ " found");
-
     }
 }
