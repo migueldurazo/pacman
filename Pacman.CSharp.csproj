@@ -77,12 +77,43 @@
     <Compile Include="Assets\scripts\StartGame.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Resources\levels\basic1.txt" />
+    <None Include="Assets\Resources\levels\bigCorners.txt" />
+    <None Include="Assets\Resources\levels\bigMaze.txt" />
+    <None Include="Assets\Resources\levels\bigSafeSearch.txt" />
+    <None Include="Assets\Resources\levels\bigSearch.txt" />
+    <None Include="Assets\Resources\levels\boxSearch.txt" />
+    <None Include="Assets\Resources\levels\capsuleClassic.txt" />
+    <None Include="Assets\Resources\levels\contestClassic.txt" />
+    <None Include="Assets\Resources\levels\contoursMaze.txt" />
+    <None Include="Assets\Resources\levels\greedySearch.txt" />
+    <None Include="Assets\Resources\levels\mediumClassic.txt" />
+    <None Include="Assets\Resources\levels\mediumCorners.txt" />
+    <None Include="Assets\Resources\levels\mediumDottedMaze.txt" />
+    <None Include="Assets\Resources\levels\mediumMaze.txt" />
+    <None Include="Assets\Resources\levels\mediumSafeSearch.txt" />
+    <None Include="Assets\Resources\levels\mediumScaryMaze.txt" />
+    <None Include="Assets\Resources\levels\mediumSearch.txt" />
     <None Include="Assets\Resources\levels\minimaxClassic.txt" />
     <None Include="Assets\Resources\levels\oddSearch.txt" />
+    <None Include="Assets\Resources\levels\openClassic.txt" />
+    <None Include="Assets\Resources\levels\openMaze.txt" />
+    <None Include="Assets\Resources\levels\openSearch.txt" />
+    <None Include="Assets\Resources\levels\originalClassic.txt" />
+    <None Include="Assets\Resources\levels\powerClassic.txt" />
+    <None Include="Assets\Resources\levels\smallClassic.txt" />
+    <None Include="Assets\Resources\levels\smallMaze.txt" />
+    <None Include="Assets\Resources\levels\smallSafeSearch.txt" />
+    <None Include="Assets\Resources\levels\smallSearch.txt" />
+    <None Include="Assets\Resources\levels\testClassic.txt" />
     <None Include="Assets\Resources\levels\testMaze.txt" />
     <None Include="Assets\Resources\levels\testSearch.txt" />
+    <None Include="Assets\Resources\levels\tinyCorners.txt" />
+    <None Include="Assets\Resources\levels\tinyMaze.txt" />
+    <None Include="Assets\Resources\levels\tinySafeSearch.txt" />
+    <None Include="Assets\Resources\levels\tinySearch.txt" />
     <None Include="Assets\Resources\levels\trappedClassic.txt" />
+    <None Include="Assets\Resources\levels\trickyClassic.txt" />
+    <None Include="Assets\Resources\levels\trickySearch.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

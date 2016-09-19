@@ -12,20 +12,52 @@ public class LevelGenerator : MonoBehaviour {
 
 
     /*
-		Patterns are used to determine what prefab will be used
-		Given a level text file such as:
+		
+		
+        A pre-process is to add double spaces for pacman and food tiles, 
+        the reason is that pacman is a 16x16 prefab and each level prefab tile
+        is 8x8, if a 'P' or '.' or a space is too tight (8x8) this will be expanded
+        Example:
+        %%%%%%
+        %P % %
+        % .  %
+        %%%%%%
+        First, it will detect tight spaces and add a symbol to it 'T'
+        %%%%%%
+        %P %T%
+        % .T %
+        %%%%%%
+        The 'T' is added when a tile is between '%' horizontally or vertically
+        The level is expanded by duplicating each column containing either
+        a 'P', '.' or 'T'
+        %%%%%%%%%%
+        %PP  %%TT%
+        %  ..TT  %
+        %%%%%%%%%%
+        Then, each row containing 'P', 'T' or '.' is duplicated
+        %%%%%%%%%%
+        %PP  %%TT%
+        %PP  %%TT%
+        %  ..TT  %
+        %  ..TT  %
+        %%%%%%%%%%
+        This level is now adjusted for pacman to move freely
+        
+        Given a level text file such as:
 		%%%%
 		%  %
 		%  %
 		%%%%
-		It will first put an edge to it:
+		It will put an edge to it, in order to create patterns.
 		eeeeee
 		e%%%%e
 		e%  %e
 		e%  %e
         e%%%%e
 		eeeeee
-		And then it will determine what each of those 1s and 0s
+
+        Patterns are used to determine what prefab will be used
+		After this pre process it will determine what each of those 1s and 0s
 		prefab is by looking at its 4 directions: top, bottom, left and right
 		for isntance:
 		eee
@@ -48,91 +80,262 @@ public class LevelGenerator : MonoBehaviour {
     public IAgent agent;
     public string levelData;
 
-	// Use this for initialization
-	void Start () {
-		
-		Dictionary<char,Dictionary<char,Dictionary<char,Dictionary<char,GameObject>>>> 
-		patterns = new Dictionary<char,Dictionary<char,Dictionary<char,Dictionary<char,GameObject>>>>();
-		
-		GameObject emptySquare = (GameObject) Resources.Load("prefabs/Empty", typeof(GameObject));
-		GameObject pacman = (GameObject) Resources.Load("prefabs/Pacman", typeof(GameObject));
+    // Use this for initialization
+    void Start() {
+
+        Dictionary<char, Dictionary<char, Dictionary<char, Dictionary<char, GameObject>>>>
+        patterns = new Dictionary<char, Dictionary<char, Dictionary<char, Dictionary<char, GameObject>>>>();
+
+        GameObject emptySquare = (GameObject)Resources.Load("prefabs/Empty", typeof(GameObject));
+        GameObject pacman = (GameObject)Resources.Load("prefabs/Pacman", typeof(GameObject));
         GameObject pacdot = (GameObject)Resources.Load("prefabs/Pacdot", typeof(GameObject));
 
         loadPatterns(patterns);
-		
-		List<List<char>> original = new List<List<char>>();
-		List<List<char>> maze = new List<List<char>>();
-		List<List<char>> characters = new List<List<char>>();
-		List<List<bool>> food = new List<List<bool>>();
+
+        List<List<char>> original = new List<List<char>>();
+        List<List<char>> maze = new List<List<char>>();
+        List<List<char>> characters = new List<List<char>>();
+        List<List<bool>> food = new List<List<bool>>();
+
+        //The file is represented as a list of strings, each string is a line on the file
+        List<string> file = readTextFile(levelData);
+
+        //The original input file is preserved as character arrays
+        foreach (string s in file) {
+
+            List<char> line = new List<char>(s.ToCharArray());
+            original.Add(line);
+
+        }
+
+        List<List<char>> preProcessed = preProcessLevel(original);
+
+        foreach (List<char> row in preProcessed) {
+
+            characters.Add(row);
+
+            maze.Add(getMazeLine(row));
+
+            food.Add(getFoodFlags(row));
+
+        }
 
 
-        List<string> file = readTextFile( levelData );
+        printMatrix(maze);
 
-        //TextAsset mytxtData = (TextAsset)Resources.Load("levels/" + file.Name.Substring(0,file.Name.Length-4));
+        printMatrix(characters);
+
+        drawLevel(patterns, maze, characters, food, emptySquare, pacman, pacdot);
 
 
-        foreach ( string s in file ){
-			
-			List<char> line = new List<char>(s.ToCharArray());
-			
-			original.Add(line);
-			
-		}
-		
-		int  matrixLength = original.Count;
-		int matrixRowLength = original[0].Count;
-		
-		Debug.Log("Matrix is "+matrixLength+" * "+matrixRowLength);
-		
-		//add a row at the top and at the bottom with 'e' (edge)
-		List<char> eRow = new List<char>();
-		for( int i = 0 ; i < matrixRowLength; i++ ){
-			
-			eRow.Add('e');
-			
-		}
-		
-		original.Insert(0,new List<char>(eRow));
-		original.Add(new List<char>(eRow));
-		
-		//add a 'e' as first and last element to every row.
-		foreach( List<char> row in original ){
-			
-			row.Add( 'e' );
-			row.Insert(0, 'e' );
-			
-		}
-		
-			
-		matrixLength = original.Count;
-		matrixRowLength = original[0].Count;
-		
-		Debug.Log("Matrix is now "+matrixLength+" * "+matrixRowLength);
-		
-		foreach( List<char> row in original ){
-			
-			characters.Add(row);
-			
-			maze.Add( getMazeLine(row) );
-			
-			food.Add( getFoodFlags(row) );
-			
-		}
-	
-		
-		printMatrix(maze);
-		
-		printMatrix(characters);
-		
-		drawLevel( patterns, maze, characters, food, emptySquare, pacman, pacdot);
-		
-		
-//		Instantiate (patterns['e']['1']['e']['1'], new Vector3(0f, 0f, 0f), Quaternion.identity);
-		
-	
-	}
-	
-	List<char> getMazeLine( List<char> line ){
+        //		Instantiate (patterns['e']['1']['e']['1'], new Vector3(0f, 0f, 0f), Quaternion.identity);
+
+
+    }
+
+
+    //Surrounds level with 'e' and expands rows and columns according to
+    //pacman size
+    List<List<char>> preProcessLevel(List<List<char>> original)
+    {
+
+        if (original == null || original.Count == 0)
+        {
+            return null;
+        }
+
+        List<List<char>> transformedList = levelExpansion(original);
+
+        transformedList = addEdge(transformedList);
+
+        return transformedList;
+
+    }
+
+    private List<List<char>> levelExpansion(List<List<char>> source)
+    {
+        List<List<char>> transformedList = new List<List<char>>();
+
+        int matrixLength = source.Count;
+        int matrixRowLength = source[0].Count;
+
+        //copy original matrix
+        for (int i = 0; i < matrixLength; i++)
+        {
+            transformedList.Add(new List<char>(source[i]));
+
+        }
+
+
+            //insert 'T's on tight spaces
+            //iterate each row
+        for (int i = 0; i < matrixLength; i++)
+        {
+
+            for (int j = 1; j < matrixRowLength - 1; j++)
+            {
+
+                char lastChar = source[i][j - 1];
+                char currentChar = source[i][j];
+                char nextChar = source[i][j + 1];
+
+                if (currentChar == ' ' && lastChar == '%' && nextChar == '%')
+                {
+
+                    //add tight space
+                    transformedList[i][j] = 'T';
+
+                }
+
+
+            }
+
+        }
+        //iterate through each column
+        for ( int i = 0; i < matrixRowLength; i++)
+        {
+
+            for( int j = 1; j < matrixLength-1; j++)
+            {
+                
+                char lastChar = source[j - 1][i];
+                char currentChar = source[j][i];
+                char nextChar = source[j + 1][i];
+
+                if( currentChar == ' ' && lastChar == '%' && nextChar == '%')
+                {
+
+                    //add tight space
+                    transformedList[j][i] = 'T';
+
+                }
+
+            
+            }
+
+        }
+
+        //iterate through each column for expansion
+        //backwards since that way new columns could be inserted
+        //otherwise out of index exceptions could be thrown
+        for (int i = matrixRowLength-1; i >= 0; i--)
+        {
+            
+            for (int j = 0; j < matrixLength; j++)
+            {
+                char character = transformedList[j][i];
+
+                if (character == 'P' || character == 'T' || character == '.')
+                {
+
+                    //duplicate column
+                    for (int k = 0; k < matrixLength; k++)
+                    {
+                        transformedList[k].Insert(i, transformedList[k][i]);
+
+                    }
+
+                    break;
+                }
+
+            }
+
+        }
+        matrixLength = transformedList.Count;
+        matrixRowLength = transformedList[0].Count;
+
+        //iterate through each row for expansion
+        //backwards since that way new rows could be inserted from the bottom up
+        //otherwise out of index exceptions could be thrown
+        for (int i = matrixLength  - 1; i >= 0; i--)
+        {
+
+            for (int j = 0; j < matrixRowLength; j++)
+            {
+
+                if(i == 27)
+                {
+
+                    int x = 2;
+
+                }
+                char character = transformedList[i][j];
+
+                if (character == 'P' || character == 'T' || character == '.')
+                {
+                    //duplicate row
+                    transformedList.Insert(i, new List<char>(transformedList[i]));
+                    break;
+                }
+
+            }
+
+        }
+
+        matrixLength = transformedList.Count;
+        matrixRowLength = transformedList[0].Count;
+
+        //remove 'T'
+        for (int i = 0; i < matrixLength; i++)
+        {
+
+            for (int j = 0; j < matrixRowLength; j++)
+            {
+                if( transformedList[i][j] == 'T')
+                {
+
+                    transformedList[i][j] = ' ';
+
+                }
+
+            }
+
+        }
+
+        return transformedList;
+
+    }
+
+    
+    private List<List<char>> addEdge(List<List<char>> source)
+    {
+        List<List<char>> transformedList = new List<List<char>>();
+
+        int matrixLength = source.Count;
+        int matrixRowLength = source[0].Count;
+
+        List<char> eRow = new List<char>();
+        for (int i = 0; i < matrixRowLength+2; i++)
+        {
+
+            eRow.Add('e');
+
+        }
+
+        //add edge space at the top
+        transformedList.Add(eRow);
+
+        //add a 'e' as first and last element to every row.
+        foreach (List<char> row in source)
+        {
+
+            List<char> newRow = new List<char>(row);
+
+            newRow.Insert(0, 'e');
+            newRow.Add('e');
+
+            transformedList.Add(newRow);
+
+        }
+
+        //add edge space at the bottom
+        transformedList.Add(eRow);
+
+        return transformedList;
+
+    }
+
+    List<char> getMazeLine( List<char> line ){
 		
 		//Convert every f (food) and p(pacman) to 0
 		
@@ -236,8 +439,6 @@ public class LevelGenerator : MonoBehaviour {
 						char bottom = maze[i+1][j];
 						char left = maze[i][j-1];
 						char right = maze[i][j+1];
-						
-						Debug.Log("Getting prefab for "+top+","+bottom+","+left+","+right);
 						
 						try{
 							
