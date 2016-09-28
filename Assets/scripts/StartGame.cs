@@ -91,8 +91,13 @@ public class StartGame : MonoBehaviour
             case 2:
 
                 return new ReactionAgent();
-                
-                
+
+            case 3:
+
+               EatAdjacentDotAgent agenteNuevo = new EatAdjacentDotAgent();
+
+               return agenteNuevo;
+
         }
 
         return new HumanAgent();

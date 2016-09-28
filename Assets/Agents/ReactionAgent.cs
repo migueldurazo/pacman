@@ -18,7 +18,7 @@ public class ReactionAgent : IAgent
             Place newPlace = originalPlace.getPlaceByMovement(direction);
             Place lastPlace = originalPlace;
 
-            while ( newPlace!=null &&  newPlace != lastPlace && !newPlace.HasFood && newPlace.Valid)
+            while ( newPlace!=null &&  newPlace != lastPlace && !newPlace.HasFood && newPlace.Valid) 
             {
 
                 lastPlace = newPlace;
