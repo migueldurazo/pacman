@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PacmanMovement : MonoBehaviour {
 
@@ -75,17 +76,10 @@ public class PacmanMovement : MonoBehaviour {
         {
             PacmanMovement.Direction direction = Agent.getDirection(transform, this);
 
-            if( direction != Direction.Idle)
-            {
-
-                int x = 2;
-
-            }
-
             //new destination, up, down, top or bottom?
             Vector2 directionVector = getDirectionVector(direction);
 
-            if( valid(directionVector, transform ))
+            if( valid( direction, directionVector, transform ))
             {
 
                 dest = (Vector2)transform.position + directionVector;
@@ -131,28 +125,74 @@ public class PacmanMovement : MonoBehaviour {
 
     } 
 
-    bool valid(Vector2 dir, Transform pacman)
+    bool valid( Direction direction, Vector2 dir, Transform pacman)
     {
+        float halfSize = pacman.GetComponent<Renderer>().bounds.size.x / 2.0f;
+        halfSize -= 0.2f; //remove a small part so it wont wrongly hit a collider
 
-        // Cast Line from 'next to Pac-Man' to 'Pac-Man'
-        Vector2 pos = pacman.position;
+        if (direction == Direction.Idle) return false;
 
-        if( pos == dir)
+        List<Vector2[]> differentPacmanPositions = new List<Vector2[]>();
+        //Add original position and where it is going
+        Vector2[] originalPair = { pacman.position, dir };
+        differentPacmanPositions.Add(originalPair);
+
+        if( direction == Direction.Down || direction == Direction.Up)
         {
 
-     //       return false;
+            //Add position for pacman prefab start bound
+            Vector2[] pairxStart = { (Vector2)pacman.position - new Vector2(halfSize, 0), dir };
+            differentPacmanPositions.Add(pairxStart);
+            //Add position for pacman prefab start bound
+            Vector2[] pairxEnd = { (Vector2)pacman.position + new Vector2(halfSize, 0), dir };
+            differentPacmanPositions.Add(pairxEnd);
+
+        }
+        if (direction == Direction.Right || direction == Direction.Left)
+        {
+
+            //Add position for pacman prefab start bound
+            Vector2[] pairyStart = { (Vector2)pacman.position - new Vector2(0, halfSize), dir };
+            differentPacmanPositions.Add(pairyStart);
+            //Add position for pacman prefab start bound
+            Vector2[] pairyEnd = { (Vector2)pacman.position + new Vector2(0, halfSize), dir };
+            differentPacmanPositions.Add(pairyEnd);
 
         }
 
-        RaycastHit2D hit = Physics2D.Linecast(pos + dir, pos);
 
-        Debug.DrawLine(pos + dir * 1.1f, pos);
-        Debug.DrawRay(pos + dir, pos);
+        foreach( Vector2[] pair in differentPacmanPositions)
+        {
 
-        bool a = (hit.collider == pacman.gameObject.GetComponent<Collider2D>())
-            || ((hit.collider != pacman.gameObject.GetComponent<Collider2D>()) && hit.collider.isTrigger);
+            // Cast Line from 'next to Pac-Man' to 'Pac-Man'
+            Vector2 pos = pair[0];
+            dir = pair[1];
 
-        return a;
+            Debug.Log(pos);
+
+            RaycastHit2D hit = Physics2D.Linecast(pos + dir, pos);
+
+            Debug.DrawLine(pos + dir , pos);
+            Debug.DrawRay(pos + dir, pos);
+
+            if( hit.collider == null)
+            {
+                continue;
+            }
+
+            bool a = (hit.collider == pacman.gameObject.GetComponent<Collider2D>())
+                || ((hit.collider != pacman.gameObject.GetComponent<Collider2D>()) && hit.collider.isTrigger);
+
+            if (!a)
+            {
+                return false;
+            }
+            
+
+        }
+
+        return true;
+       
     }
 
 }
