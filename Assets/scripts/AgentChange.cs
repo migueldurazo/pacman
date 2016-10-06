@@ -39,7 +39,18 @@ public class AgentChange : MonoBehaviour {
                 optionsDropdown.value = optionsDropdown.value + 1;
                 optionsDropdown.value = TempInt;
 
-                
+                break;
+
+            case 4:
+                optionsDropdown.gameObject.SetActive(true);
+                optionsLabel.gameObject.SetActive(true);
+
+                optionsDropdown.options.Add(new Dropdown.OptionData("DFS"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("BFS"));
+
+                TempInt = optionsDropdown.value;
+                optionsDropdown.value = optionsDropdown.value + 1;
+                optionsDropdown.value = TempInt;
 
                 break;
 

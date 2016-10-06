@@ -117,11 +117,53 @@ public class Place
 
         }
 
-        return this; ;
+        return null; 
 
     }
 
+    public Place clone()
+    {
+
+        Place newPlace = new Place();
+      
+        newPlace.HasFood = this.HasFood;
+        newPlace.PacmanPosition = this.PacmanPosition;
+        newPlace.Valid = this.Valid;
+        newPlace.X = this.X;
+        newPlace.Y = this.Y;
+        newPlace.level = this.level;
+
+        return newPlace;
+
+    }
+
+    public override bool Equals(object other)
+    {
         
+        if (this.Valid != ((Place)other).Valid) return false;
+        if (this.HasFood != ((Place)other).HasFood) return false;
+        if (this.X != ((Place)other).X) return false;
+        if (this.Y != ((Place)other).Y) return false;
+
+        return true;
+
+    }
+
+    public override int GetHashCode()
+    {
+        int hash = 13;
+        hash = (hash * 7) + (Valid ? 99 : 135);
+        hash = (hash * 7) + (HasFood ? 12 : 883);
+        hash = (hash * 7) + X * 3;
+        hash = (hash * 7) + Y * 9;
+
+        return hash;
+    }
+
+    public override string ToString()
+    {
+        return "{X=" + X + ",Y=" + Y + ",Valid=" + Valid + ",HasFood=" + hasFood + "}";
+    }
 
 
 }

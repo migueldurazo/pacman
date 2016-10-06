@@ -26,9 +26,9 @@ public class EatAdjacentDotAgent : IAgent
         if (plan.Count == 0)
         {
 
-            Place original = pacmanMovement.CurrentPlace;
+            Place original = pacmanMovement.Level.PacmanPosition;
 
-            Place current = pacmanMovement.CurrentPlace;
+            Place current = pacmanMovement.Level.PacmanPosition;
             
             foreach (PacmanMovement.Direction direction in directions)
             {

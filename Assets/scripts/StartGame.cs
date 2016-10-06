@@ -98,6 +98,12 @@ public class StartGame : MonoBehaviour
 
                return agenteNuevo;
 
+            case 4:
+
+                SearchAgent.SearchAlgorithm algorithm = getSearchAlgorithm(options);
+
+                return new SearchAgent(algorithm);
+
         }
 
         return new HumanAgent();
@@ -121,6 +127,25 @@ public class StartGame : MonoBehaviour
         }
 
         return PacmanMovement.Direction.Left;
+    }
+
+    SearchAgent.SearchAlgorithm getSearchAlgorithm(int options)
+    {
+
+        switch (options)
+        {
+            case 0:
+                return SearchAgent.SearchAlgorithm.DFS;
+            case 1:
+                return SearchAgent.SearchAlgorithm.BFS;
+            case 2:
+                return SearchAgent.SearchAlgorithm.UCS;
+            case 3:
+                return SearchAgent.SearchAlgorithm.ASTAR;
+
+        }
+
+        return SearchAgent.SearchAlgorithm.BFS;
     }
 
 

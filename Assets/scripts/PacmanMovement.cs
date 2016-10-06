@@ -6,7 +6,6 @@ public class PacmanMovement : MonoBehaviour {
 
     private IAgent agent;
     private Level level;
-    private Place currentPlace;
 
     public enum Direction { Right, Left, Up, Down, Idle };
 
@@ -39,21 +38,6 @@ public class PacmanMovement : MonoBehaviour {
         }
     }
 
-    public Place CurrentPlace
-    {
-        get
-        {
-            return currentPlace;
-        }
-
-        set
-        {
-            currentPlace = value;
-        }
-    }
-
-
-
     // Use this for initialization
     void Start () {
 
@@ -84,9 +68,9 @@ public class PacmanMovement : MonoBehaviour {
 
                 dest = (Vector2)transform.position + directionVector;
 
-                currentPlace = currentPlace.getPlaceByMovement(direction);
+                level.updatePacmanPosition(direction);
 
-                currentPlace.HasFood = false;
+                Debug.Log("Score: " + level.Score);
 
             }
 
@@ -167,8 +151,6 @@ public class PacmanMovement : MonoBehaviour {
             // Cast Line from 'next to Pac-Man' to 'Pac-Man'
             Vector2 pos = pair[0];
             dir = pair[1];
-
-            Debug.Log(pos);
 
             RaycastHit2D hit = Physics2D.Linecast(pos + dir, pos);
 

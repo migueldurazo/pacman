@@ -121,15 +121,11 @@ public class LevelGenerator : MonoBehaviour {
         }
 
 
-        printMatrix(maze);
+       // printMatrix(maze);
 
-        printMatrix(characters);
+       // printMatrix(characters);
 
         drawLevel(patterns, maze, characters, food, emptySquare, pacman, pacdot);
-
-
-        //		Instantiate (patterns['e']['1']['e']['1'], new Vector3(0f, 0f, 0f), Quaternion.identity);
-
 
     }
 
@@ -345,7 +341,7 @@ public class LevelGenerator : MonoBehaviour {
 			
 			char realC = c;
 			
-			if( c=='.' || c=='P' || c=='G' ){
+			if( c=='.' || c=='P' || c=='G' || c=='o' ){
 				
 				realC = ' ';
 				
@@ -450,7 +446,13 @@ public class LevelGenerator : MonoBehaviour {
 							
 							prefab = emptySquare;
 							
-						}	
+						}catch( KeyNotFoundException knf)
+                        {
+                            Debug.Log("The pattern " + top + "," + bottom + "," + left + "," + right + " Does not have a prefab");
+
+                            prefab = emptySquare;
+
+                        }	
 						
 					}
 
@@ -481,6 +483,8 @@ public class LevelGenerator : MonoBehaviour {
 
                         place.HasFood = true;
 
+                        level.FoodCount++;
+
                     }
 
                     if (maze[i][j] == ' ' && maze[i][j + 1] == ' ' && maze[i + 1][j] == ' '
@@ -509,11 +513,9 @@ public class LevelGenerator : MonoBehaviour {
 
                         pacmanMovement.Agent = agent;
 
+                        level.PacmanPosition = place;
+
                         pacmanMovement.Level = level;
-
-                        pacmanMovement.CurrentPlace = place;
-
-                        Debug.Log(place.X + ":" + place.Y);
 						
 					}
 

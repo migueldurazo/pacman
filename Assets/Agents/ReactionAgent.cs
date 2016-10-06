@@ -8,7 +8,7 @@ public class ReactionAgent : IAgent
     public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
     {
 
-        Place originalPlace = pacmanMovement.CurrentPlace;
+        Place originalPlace = pacmanMovement.Level.PacmanPosition;
 
         foreach (PacmanMovement.Direction direction in Enum.GetValues(typeof(PacmanMovement.Direction)))
         {
