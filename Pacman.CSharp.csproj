@@ -103,6 +103,7 @@
     <None Include="Assets\Resources\levels\mediumScaryMaze.txt" />
     <None Include="Assets\Resources\levels\mediumSearch.txt" />
     <None Include="Assets\Resources\levels\minimaxClassic.txt" />
+    <None Include="Assets\Resources\levels\nuevo.txt" />
     <None Include="Assets\Resources\levels\oddSearch.txt" />
     <None Include="Assets\Resources\levels\openClassic.txt" />
     <None Include="Assets\Resources\levels\openMaze.txt" />

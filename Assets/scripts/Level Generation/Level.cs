@@ -15,8 +15,9 @@ public class Level  {
     public Place PacmanPosition;
     private int foodCount;
     private int score = 0;
-    private int FOOD_SCORE = 100;
-    private int MOVE_PENALTY = 1;
+    public int FOOD_SCORE = 10;
+    public int MOVE_PENALTY = 1;
+    public int WIN_SCORE = 500;
 
     public int Score
     {
@@ -60,14 +61,14 @@ public class Level  {
     public Place getPlace(int x, int y)
     {
 
-        if( x >= Board.Count)
+        if (x >= Board.Count || x < 0)
         {
 
             return null;
 
         }
 
-        if( y >=  Board[x].Count)
+        if( y >=  Board[x].Count || y < 0)
         {
 
             return null;
@@ -99,6 +100,8 @@ public class Level  {
         newLevel.foodCount = this.foodCount;
 
         newLevel.PacmanPosition = this.PacmanPosition.clone();
+
+        newLevel.score = this.score;
 
         return newLevel;
 
@@ -186,6 +189,8 @@ public class Level  {
         return "{Food left: " + foodCount+"}";
     }
 
+    
+
     public bool updatePacmanPosition( PacmanMovement.Direction dir) 
     {
 
@@ -200,14 +205,16 @@ public class Level  {
             {
                 foodCount--;
                 score += FOOD_SCORE;
-            }else
-            {
-                
-                score -= MOVE_PENALTY;
-                
             }
+                
+            score -= MOVE_PENALTY;
+                
             newPlace.HasFood = false;
             
+            if( foodCount == 0)
+            {
+                score += WIN_SCORE;
+            }
             
             return true;
         }

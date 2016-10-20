@@ -47,6 +47,8 @@ public class AgentChange : MonoBehaviour {
 
                 optionsDropdown.options.Add(new Dropdown.OptionData("DFS"));
                 optionsDropdown.options.Add(new Dropdown.OptionData("BFS"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("UCS"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("ASTAR"));
 
                 TempInt = optionsDropdown.value;
                 optionsDropdown.value = optionsDropdown.value + 1;

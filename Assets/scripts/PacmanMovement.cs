@@ -7,7 +7,7 @@ public class PacmanMovement : MonoBehaviour {
     private IAgent agent;
     private Level level;
 
-    public enum Direction { Right, Left, Up, Down, Idle };
+    public enum Direction { Right, Up, Left, Down, Idle };
 
     public float speed = 0.4f;
 	Vector2 dest = Vector2.zero;

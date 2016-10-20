@@ -12,6 +12,51 @@ namespace Assets.Agents.Search
         public PacmanSearchState( Level level )
         {
             levelAtSomePoint = level.clone();
+            
+        }
+        protected override bool calculateHeuristic()
+        {
+
+            Place pacmanPos = levelAtSomePoint.PacmanPosition;
+
+            int pacX = pacmanPos.X;
+            int pacY = pacmanPos.Y;
+
+            int x = 0;
+            int y = 0;
+
+            Place place = null;
+            double totalDistance = 0.0;
+
+            do
+            {
+
+                place = levelAtSomePoint.getPlace(x, y);
+
+                if (place == null)
+                {
+                    y++;
+                    x = 0;
+                    place = levelAtSomePoint.getPlace(x, y);
+                }
+                else
+                {
+
+                    x++;
+
+                }
+
+                if( place != null && place.HasFood)
+                {
+                    totalDistance += (double)(Math.Abs(x - pacX) + Math.Abs(y - pacY));
+                }
+
+            } while (place != null );
+
+            Heuristic = totalDistance;
+            
+            return true;
+            
         }
 
         public override bool Equals(object comparingState)
@@ -102,7 +147,6 @@ namespace Assets.Agents.Search
         {
             return levelAtSomePoint;
         }
-
-      
+        
     }
 }

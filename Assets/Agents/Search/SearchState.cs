@@ -47,11 +47,29 @@ namespace Assets.Agents.Search
             }
         }
 
+        private bool heuristicCalculated;
+
         private double heuristic = 0.0;
         public double Heuristic
         {
-            get { return heuristic; }
+            get {
+                if (!heuristicCalculated)
+                    prepareHeuristic();
+                return heuristic;
+            }
             set { heuristic = value;  }
+        }
+
+        protected abstract bool calculateHeuristic();
+
+        private void prepareHeuristic()
+        {
+
+            if (calculateHeuristic())
+            {
+                heuristicCalculated = true;
+            }
+            
         }
         
         public abstract SearchState getSuccessorState(Action action);

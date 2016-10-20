@@ -74,7 +74,7 @@ class SearchAgent : IAgent
         switch( algorithm)
         {
             case SearchAlgorithm.ASTAR:
-            return null;
+                return problem.solveAStar();
 
             case SearchAlgorithm.BFS:
                 return problem.solveBFS();
@@ -83,7 +83,7 @@ class SearchAgent : IAgent
                 return problem.solveDFS();
 
             case SearchAlgorithm.UCS:
-                return null;
+                return problem.solveUCS();
                 
         }
 

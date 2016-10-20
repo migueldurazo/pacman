@@ -26,6 +26,8 @@ namespace Assets.Agents.Search
 
             SearchState pacmanSearchState = (PacmanSearchState)state;
 
+            int lastStateFood = ((PacmanSearchState)pacmanSearchState).getLevel().FoodCount;
+
             foreach (PacmanMovement.Direction direction in Enum.GetValues(typeof(PacmanMovement.Direction)))
             {
                 if (direction == PacmanMovement.Direction.Idle) continue;
@@ -33,7 +35,19 @@ namespace Assets.Agents.Search
                 PacmanAction action = new PacmanAction();
                 action.Cost = 1;
                 action.Direction = direction;
-                action.Successor = pacmanSearchState.getSuccessorState(action);
+
+                PacmanSearchState successorState = (PacmanSearchState)pacmanSearchState.getSuccessorState(action);
+
+                action.Successor = successorState;
+
+                int currentStateFood = successorState==null?lastStateFood:successorState.getLevel().FoodCount;
+
+                if( lastStateFood == currentStateFood)  //no comio
+                {
+
+                    action.Cost = 2;
+
+                }
 
                 if (action.Successor != null)
                 {
