@@ -10,6 +10,7 @@ public class Place
     private int y;
     private Level level;
     private bool hasFood = false;
+    private bool hasPowerUp = false;
 
     public Vector3 PacmanPosition
     {
@@ -89,6 +90,19 @@ public class Place
         }
     }
 
+    public bool HasPowerUp
+    {
+        get
+        {
+            return hasPowerUp;
+        }
+
+        set
+        {
+            hasPowerUp = value;
+        }
+    }
+
     public Place getPlaceByMovement( PacmanMovement.Direction direction)
     {
 
@@ -121,7 +135,7 @@ public class Place
 
     }
 
-    public Place clone()
+    public Place clone(Level level)
     {
 
         Place newPlace = new Place();
@@ -131,15 +145,53 @@ public class Place
         newPlace.Valid = this.Valid;
         newPlace.X = this.X;
         newPlace.Y = this.Y;
-        newPlace.level = this.level;
-
+        newPlace.level = level;
         return newPlace;
+
+    }
+
+    public bool overlaps ( Place other, int squareSize)
+    {
+        int rows = squareSize / 2;
+        int cols = squareSize / 2;
+
+        for( int i = 0; i < rows; i++)
+        {
+            for( int j = 0; j < cols; j++)
+            {
+                for (int k = 0; k < rows; k++)
+                {
+                    for (int l = 0; l < cols; l++)
+                    {
+                        int thisX = this.X + i;
+                        int thisY = this.Y + j;
+                        //TODO compare with all squares from other
+                        int otherX = other.X + k;
+                        int otherY = other.Y + l;
+
+                        if( thisX == otherX && thisY == otherY )
+                        {
+                            return true;
+                        }
+
+                    }
+                }
+
+            }
+        }
+
+        return false;
 
     }
 
     public override bool Equals(object other)
     {
         
+        if( this.Valid == null || other == null)
+        {
+            int x = 2;
+        }
+
         if (this.Valid != ((Place)other).Valid) return false;
         if (this.HasFood != ((Place)other).HasFood) return false;
         if (this.X != ((Place)other).X) return false;
@@ -148,6 +200,8 @@ public class Place
         return true;
 
     }
+
+
 
     public override int GetHashCode()
     {
@@ -163,6 +217,11 @@ public class Place
     public override string ToString()
     {
         return "{X=" + X + ",Y=" + Y + ",Valid=" + Valid + ",HasFood=" + hasFood + "}";
+    }
+
+    public double distance(Place other)
+    {
+        return Mathf.Abs(this.X - other.X) + Mathf.Abs(this.Y - other.Y);
     }
 
 

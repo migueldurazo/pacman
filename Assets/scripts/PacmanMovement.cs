@@ -1,16 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class PacmanMovement : MonoBehaviour {
 
-    private IAgent agent;
+    public IAgent agent = new HumanAgent();
     private Level level;
 
+    private string ScoreData = "";
     public enum Direction { Right, Up, Left, Down, Idle };
 
     public float speed = 0.4f;
 	Vector2 dest = Vector2.zero;
+
+    public bool greenLight = true;
 
     public IAgent Agent
     {
@@ -44,21 +48,32 @@ public class PacmanMovement : MonoBehaviour {
 		dest = transform.position;
 	
 	}
-	
+
+    void OnTriggerEnter2D(Collider2D co)
+    {
+        if (co.name.StartsWith("Pacman"))
+        {
+            //GetComponent<AudioSource>().Play();
+           // GameObject.Find("Texto").GetComponent<Text>().text = "Game Over";
+            // Application.LoadLevel("main");
+        }
+
+    }
     void FixedUpdate() {
 
         if(Agent == null)
         {
             return;
         }
-		
+
         // Move closer to Destination
         Vector2 p = Vector2.MoveTowards(transform.position, dest, speed);
         GetComponent<Rigidbody2D>().MovePosition(p);
 
         if (Vector2.Distance(dest, (Vector2)transform.position) <= 0.1f)
         {
-            PacmanMovement.Direction direction = Agent.getDirection(transform, this);
+            
+            PacmanMovement.Direction direction = Agent.getDirection( level, agent.agentPlace );
 
             //new destination, up, down, top or bottom?
             Vector2 directionVector = getDirectionVector(direction);
@@ -68,9 +83,18 @@ public class PacmanMovement : MonoBehaviour {
 
                 dest = (Vector2)transform.position + directionVector;
 
-                level.updatePacmanPosition(direction);
+                if (transform.tag != "ghost") {
 
-                Debug.Log("Score: " + level.Score);
+                    level.updatePacmanPosition(direction);
+
+                    Debug.Log("Score: " + level.Score);
+
+                    GameObject.Find("InGame").GetComponent<Text>().text =
+                        ("Score: " + level.Score + "\n");
+
+                    // Usar las ghost positions y pacman position para el game over
+
+                }
 
             }
 
@@ -109,26 +133,26 @@ public class PacmanMovement : MonoBehaviour {
 
     } 
 
-    bool valid( Direction direction, Vector2 dir, Transform pacman)
+    bool valid( Direction direction, Vector2 dir, Transform entity)
     {
-        float halfSize = pacman.GetComponent<Renderer>().bounds.size.x / 2.0f;
+        float halfSize = entity.GetComponent<Renderer>().bounds.size.x / 2.0f;
         halfSize -= 0.2f; //remove a small part so it wont wrongly hit a collider
 
         if (direction == Direction.Idle) return false;
 
         List<Vector2[]> differentPacmanPositions = new List<Vector2[]>();
         //Add original position and where it is going
-        Vector2[] originalPair = { pacman.position, dir };
+        Vector2[] originalPair = { entity.position, dir };
         differentPacmanPositions.Add(originalPair);
 
         if( direction == Direction.Down || direction == Direction.Up)
         {
 
             //Add position for pacman prefab start bound
-            Vector2[] pairxStart = { (Vector2)pacman.position - new Vector2(halfSize, 0), dir };
+            Vector2[] pairxStart = { (Vector2)entity.position - new Vector2(halfSize, 0), dir };
             differentPacmanPositions.Add(pairxStart);
             //Add position for pacman prefab start bound
-            Vector2[] pairxEnd = { (Vector2)pacman.position + new Vector2(halfSize, 0), dir };
+            Vector2[] pairxEnd = { (Vector2)entity.position + new Vector2(halfSize, 0), dir };
             differentPacmanPositions.Add(pairxEnd);
 
         }
@@ -136,10 +160,10 @@ public class PacmanMovement : MonoBehaviour {
         {
 
             //Add position for pacman prefab start bound
-            Vector2[] pairyStart = { (Vector2)pacman.position - new Vector2(0, halfSize), dir };
+            Vector2[] pairyStart = { (Vector2)entity.position - new Vector2(0, halfSize), dir };
             differentPacmanPositions.Add(pairyStart);
             //Add position for pacman prefab start bound
-            Vector2[] pairyEnd = { (Vector2)pacman.position + new Vector2(0, halfSize), dir };
+            Vector2[] pairyEnd = { (Vector2)entity.position + new Vector2(0, halfSize), dir };
             differentPacmanPositions.Add(pairyEnd);
 
         }
@@ -162,8 +186,8 @@ public class PacmanMovement : MonoBehaviour {
                 continue;
             }
 
-            bool a = (hit.collider == pacman.gameObject.GetComponent<Collider2D>())
-                || ((hit.collider != pacman.gameObject.GetComponent<Collider2D>()) && hit.collider.isTrigger);
+            bool a = (hit.collider == entity.gameObject.GetComponent<Collider2D>())
+                || ((hit.collider != entity.gameObject.GetComponent<Collider2D>()) && hit.collider.isTrigger);
 
             if (!a)
             {

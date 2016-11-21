@@ -31,6 +31,7 @@ namespace Assets.Agents.Search
                 SearchState state = fringe.Dequeue();
                 if( isGoalState(state))
                 {
+                    Debug.Log(expandedNodes + " nodes expanded");
                     return state.Plan;
                 }
 
@@ -82,6 +83,7 @@ namespace Assets.Agents.Search
                 SearchState state = fringe.Dequeue();
                 if (isGoalState(state))
                 {
+                    Debug.Log(expandedNodes + " nodes expanded");
                     return state.Plan;
                 }
 
@@ -123,9 +125,54 @@ namespace Assets.Agents.Search
         public List<object> solveBFS()
         {
 
-            //Implement Breadth-first search
-            
-         
+            int level = 1;
+            int expandedNodes = 0;
+            SearchState start = getStartState();
+            start.Priority = level;
+            start.UseHigherPriority = false;
+            fringe.Enqueue(start);
+
+            while (fringe.Count() > 0)
+            {
+                SearchState state = fringe.Dequeue();
+                if (isGoalState(state))
+                {
+                    Debug.Log(expandedNodes + " nodes expanded");
+                    return state.Plan;
+                }
+
+                int hash = state.GetHashCode();
+
+                if (!closed.Contains(state))
+                {
+                    closed.Add(state);
+                    List<Action> successors = getSuccessors(state);
+                    expandedNodes++;
+                    foreach (Action successorAction in successors)
+                    {
+                        SearchState successorState = successorAction.Successor;
+                        successorState.Plan = state.Plan;
+                        successorState.Plan.Add(successorAction.getAction());
+                        successorState.Priority = state.Priority + 1;
+                        fringe.Enqueue(successorState);
+                    }
+                    if (expandedNodes % 1000 == 0)
+                    {
+                        Debug.Log("Expanded " + expandedNodes + " Nodes");
+
+                        /* if (expandedNodes == 20000)
+                         {
+                             Debug.Log("Too many nodes");
+                             return state.Plan;
+                         }*/
+
+                    }
+
+                }
+
+            }
+
+
 
             return null;
 
@@ -135,8 +182,53 @@ namespace Assets.Agents.Search
         public List<object> solveAStar()
         {
 
-            //Implement A* search
-            
+            int expandedNodes = 0;
+            SearchState start = getStartState();
+            start.Priority = 0;
+            start.UseHigherPriority = false;
+            fringe.Enqueue(start);
+
+            while (fringe.Count() > 0)
+            {
+                SearchState state = fringe.Dequeue();
+                if (isGoalState(state))
+                {
+                    Debug.Log(expandedNodes + " nodes expanded");
+                    return state.Plan;
+                }
+
+                int hash = state.GetHashCode();
+
+                if (!closed.Contains(state))
+                {
+                    closed.Add(state);
+                    List<Action> successors = getSuccessors(state);
+                    expandedNodes++;
+                    foreach (Action successorAction in successors)
+                    {
+                        SearchState successorState = successorAction.Successor;
+                        successorState.Plan = state.Plan;
+                        successorState.Plan.Add(successorAction.getAction());
+                        successorState.Priority = state.Priority + successorAction.Cost - state.Heuristic + successorState.Heuristic;
+                        fringe.Enqueue(successorState);
+                    }
+                    if (expandedNodes % 1000 == 0)
+                    {
+                        Debug.Log("Expanded " + expandedNodes + " Nodes");
+
+                        /*    if (expandedNodes == 20000)
+                            {
+                                Debug.Log("Too many nodes");
+                                return state.Plan;
+                            }*/
+
+                    }
+
+                }
+
+            }
+
+
             return null;
 
         }

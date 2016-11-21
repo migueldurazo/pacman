@@ -4,19 +4,13 @@ using System.IO;
 using System.Collections.Generic;
 
 public class LevelGenerator : MonoBehaviour {
-
-    public enum Maze {
-
-        Test, Sample1
-    };
-
-
+    
     /*
 		
 		
         A pre-process is to add double spaces for pacman and food tiles, 
         the reason is that pacman is a 16x16 prefab and each level prefab tile
-        is 8x8, if a 'P' or '.' or a space is too tight (8x8) this will be expanded
+        is 8x8, if a pacmanChar or '.' or a space is too tight (8x8) this will be expanded
         Example:
         %%%%%%
         %P % %
@@ -29,12 +23,12 @@ public class LevelGenerator : MonoBehaviour {
         %%%%%%
         The 'T' is added when a tile is between '%' horizontally or vertically
         The level is expanded by duplicating each column containing either
-        a 'P', '.' or 'T'
+        a pacmanChar, '.' or 'T'
         %%%%%%%%%%
         %PP  %%TT%
         %  ..TT  %
         %%%%%%%%%%
-        Then, each row containing 'P', 'T' or '.' is duplicated
+        Then, each row containing pacmanChar, 'T' or '.' is duplicated
         %%%%%%%%%%
         %PP  %%TT%
         %PP  %%TT%
@@ -77,11 +71,41 @@ public class LevelGenerator : MonoBehaviour {
 	
 	*/
 
+    private char pacmanChar = 'P';
+    private char foodChar = '.';
+    private char tightSpaceChar = 'T';
+    private char emptySpaceChar = ' ';
+    private char wallChar = '%';
+    private char edgeChar = 'e';
+    private char powerUpChar = 'o';
+    private char ghostChar = 'G';
+    
+
     public IAgent agent;
     public string levelData;
+    public Level generatedLevel;
+    private Camera CameraVisual;
+    private GameObject Camera;
+    private List<GameObject> ghosts = new List<GameObject>();
 
+    int ghostIndex = 0;
+
+    public GameObject multiAgentGO = null;
+
+    bool multiAgent = false;
     // Use this for initialization
     void Start() {
+
+        if (agent != null)
+        {
+            if( agent is MultiAgent)
+            {
+                multiAgent = true;
+            }
+        }
+
+        Camera = GameObject.FindGameObjectWithTag("MainCamera");
+        CameraVisual = Camera.GetComponent<Camera>();
 
         Dictionary<char, Dictionary<char, Dictionary<char, Dictionary<char, GameObject>>>>
         patterns = new Dictionary<char, Dictionary<char, Dictionary<char, Dictionary<char, GameObject>>>>();
@@ -89,6 +113,10 @@ public class LevelGenerator : MonoBehaviour {
         GameObject emptySquare = (GameObject)Resources.Load("prefabs/Empty", typeof(GameObject));
         GameObject pacman = (GameObject)Resources.Load("prefabs/Pacman", typeof(GameObject));
         GameObject pacdot = (GameObject)Resources.Load("prefabs/Pacdot", typeof(GameObject));
+        GameObject powerup = (GameObject)Resources.Load("prefabs/PowerUp", typeof(GameObject));
+
+        GameObject blinky = (GameObject)Resources.Load("prefabs/Blinky", typeof(GameObject));
+        ghosts.Add(blinky);
 
         loadPatterns(patterns);
 
@@ -121,11 +149,12 @@ public class LevelGenerator : MonoBehaviour {
         }
 
 
-       // printMatrix(maze);
+        printMatrix(maze);
 
-       // printMatrix(characters);
+        printMatrix(characters);
 
-        drawLevel(patterns, maze, characters, food, emptySquare, pacman, pacdot);
+        generatedLevel = drawLevel(patterns, maze, characters, food,
+            emptySquare, pacman, pacdot, powerup, ghosts);
 
     }
 
@@ -146,6 +175,15 @@ public class LevelGenerator : MonoBehaviour {
 
         return transformedList;
 
+    }
+
+    private int getGhostIndex()
+    {
+        int aux = ghostIndex++;
+
+        if (ghostIndex == ghosts.Count) ghostIndex = 0;
+
+        return aux;
     }
 
     private List<List<char>> levelExpansion(List<List<char>> source)
@@ -175,11 +213,11 @@ public class LevelGenerator : MonoBehaviour {
                 char currentChar = source[i][j];
                 char nextChar = source[i][j + 1];
 
-                if (currentChar == ' ' && lastChar == '%' && nextChar == '%')
+                if (currentChar == emptySpaceChar && lastChar == wallChar && nextChar == wallChar)
                 {
 
                     //add tight space
-                    transformedList[i][j] = 'T';
+                    transformedList[i][j] = tightSpaceChar;
 
                 }
 
@@ -198,11 +236,11 @@ public class LevelGenerator : MonoBehaviour {
                 char currentChar = source[j][i];
                 char nextChar = source[j + 1][i];
 
-                if( currentChar == ' ' && lastChar == '%' && nextChar == '%')
+                if( currentChar == emptySpaceChar && lastChar == wallChar && nextChar == wallChar)
                 {
 
                     //add tight space
-                    transformedList[j][i] = 'T';
+                    transformedList[j][i] = tightSpaceChar;
 
                 }
 
@@ -214,14 +252,14 @@ public class LevelGenerator : MonoBehaviour {
         //iterate through each column for expansion
         //backwards since that way new columns could be inserted
         //otherwise out of index exceptions could be thrown
-        for (int i = matrixRowLength-1; i >= 0; i--)
+        for (int i = matrixRowLength - 1; i >= 0; i--)
         {
-            
+
             for (int j = 0; j < matrixLength; j++)
             {
                 char character = transformedList[j][i];
 
-                if (character == 'P' || character == 'T' || character == '.')
+                if (isExpandableCharacter(character))
                 {
 
                     //duplicate column
@@ -249,15 +287,9 @@ public class LevelGenerator : MonoBehaviour {
             for (int j = 0; j < matrixRowLength; j++)
             {
 
-                if(i == 27)
-                {
-
-                    int x = 2;
-
-                }
                 char character = transformedList[i][j];
 
-                if (character == 'P' || character == 'T' || character == '.')
+                if (isExpandableCharacter(character))
                 {
                     //duplicate row
                     transformedList.Insert(i, new List<char>(transformedList[i]));
@@ -277,10 +309,10 @@ public class LevelGenerator : MonoBehaviour {
 
             for (int j = 0; j < matrixRowLength; j++)
             {
-                if( transformedList[i][j] == 'T')
+                if( transformedList[i][j] == tightSpaceChar)
                 {
 
-                    transformedList[i][j] = ' ';
+                    transformedList[i][j] = emptySpaceChar;
 
                 }
 
@@ -292,6 +324,10 @@ public class LevelGenerator : MonoBehaviour {
 
     }
 
+    private bool isExpandableCharacter(char c)
+    {
+        return c == pacmanChar || c == tightSpaceChar || c == foodChar || c == ghostChar;
+    }
     
     private List<List<char>> addEdge(List<List<char>> source)
     {
@@ -304,7 +340,7 @@ public class LevelGenerator : MonoBehaviour {
         for (int i = 0; i < matrixRowLength+2; i++)
         {
 
-            eRow.Add('e');
+            eRow.Add(edgeChar);
 
         }
 
@@ -317,8 +353,8 @@ public class LevelGenerator : MonoBehaviour {
 
             List<char> newRow = new List<char>(row);
 
-            newRow.Insert(0, 'e');
-            newRow.Add('e');
+            newRow.Insert(0, edgeChar);
+            newRow.Add(edgeChar);
 
             transformedList.Add(newRow);
 
@@ -333,7 +369,7 @@ public class LevelGenerator : MonoBehaviour {
 
     List<char> getMazeLine( List<char> line ){
 		
-		//Convert every f (food) and p(pacman) to 0
+		//Convert every .(food), P(pacman),G(ghost) and o(Power up) to empty
 		
 		List<char> newLine = new List<char>();
 		
@@ -341,9 +377,9 @@ public class LevelGenerator : MonoBehaviour {
 			
 			char realC = c;
 			
-			if( c=='.' || c=='P' || c=='G' || c=='o' ){
+			if( c==foodChar || c==pacmanChar || c==ghostChar || c==powerUpChar ){
 				
-				realC = ' ';
+				realC = emptySpaceChar;
 				
 			}
 			
@@ -363,7 +399,7 @@ public class LevelGenerator : MonoBehaviour {
 		
 		foreach( char c in line ){
 			
-			if(  c == '.' ){
+			if(  c == foodChar ){
 				
 				foodFlags.Add(true);
 				
@@ -382,12 +418,11 @@ public class LevelGenerator : MonoBehaviour {
 
 
     
-	void drawLevel(Dictionary<char,Dictionary<char,Dictionary<char,Dictionary<char,GameObject>>>> patterns,
+	Level drawLevel(Dictionary<char,Dictionary<char,Dictionary<char,Dictionary<char,GameObject>>>> patterns,
 		List<List<char>> maze, List<List<char>> characters, List<List<bool>> food, GameObject emptySquare,
-			GameObject pacman, GameObject pacdot ){
+			GameObject pacman, GameObject pacdot, GameObject powerup, List<GameObject> ghosts ){
 
         Level level = new Level();
-
 
         int height = maze.Count;
 		int width = maze[0].Count;
@@ -395,21 +430,28 @@ public class LevelGenerator : MonoBehaviour {
         //This data structure helps to see if a piece of food is already in place, initialized to false
         List<List<bool>> foodIsPlaced = createSameDimensionStructure(food);
        
-
         float prefabSize = emptySquare.GetComponent<Renderer>().bounds.size.x;
-		
-		Debug.Log("size "+prefabSize);
 		
 		float startX = ((float)width/2f)*prefabSize*-1f;
 		float startY = ((float)height/2f)*prefabSize;
 		
+        if( width >= 74 && height >=74)
+        {
+            CameraVisual.fieldOfView = 155;
+        }else
+        if( width >= 55 && height >= 53)
+        {
+            CameraVisual.fieldOfView = 143;
+        }
+
 		float currentX = startX;
 		float currentY = startY;
 		
 		float distance = prefabSize;
 
         int boardXCoordinate = 0;
-        
+
+        List<IAgent> agentMovements = new List<IAgent>();
 		
 		for( int i = 0 ; i < maze.Count ; i++ ){
 			
@@ -423,13 +465,13 @@ public class LevelGenerator : MonoBehaviour {
 				
 				char current = maze[i][j];
 				
-				if( current != 'e' ){
+				if( current != edgeChar ){
 
                     //valid area
 					
 					GameObject prefab = emptySquare;
 					
-					if(  current != ' ' ){
+					if(  current != emptySpaceChar ){
 						
 						char top = maze[i-1][j];
 						char bottom = maze[i+1][j];
@@ -460,8 +502,10 @@ public class LevelGenerator : MonoBehaviour {
 					Vector3 position = new Vector3 (currentX, currentY, 0f);
 					Instantiate (prefab,position, Quaternion.identity);
                     
-                    //use to instantiate pacman, pacdots and ghosts
-                    Vector3 entityPosition = new Vector3(currentX + prefabSize / 2f, currentY - prefabSize / 2f, 0f);
+                    //use to instantiate pacman, pacdots, powerups and ghosts
+                    Vector3 entityPosition = 
+                        new Vector3(currentX + prefabSize / 2f,
+                                    currentY - prefabSize / 2f, 0f);
 
                     Place place = new Place();
                     place.Valid = false;
@@ -487,8 +531,8 @@ public class LevelGenerator : MonoBehaviour {
 
                     }
 
-                    if (maze[i][j] == ' ' && maze[i][j + 1] == ' ' && maze[i + 1][j] == ' '
-                        && maze[i + 1][j + 1] == ' ')
+                    if (maze[i][j] == emptySpaceChar && maze[i][j + 1] == emptySpaceChar && maze[i + 1][j] == emptySpaceChar
+                        && maze[i + 1][j + 1] == emptySpaceChar)
                     {
 
                         place.Valid = true;
@@ -502,24 +546,83 @@ public class LevelGenerator : MonoBehaviour {
 
                     boardRow.Add(place);
 
-                    if ( characters[i][j] == 'P' && characters[i][j+1] == 'P' && characters[i+1][j]=='P'
-						&& characters[i+1][j+1] == 'P'){
+                    if ( characters[i][j] == pacmanChar && characters[i][j+1] == pacmanChar && characters[i+1][j]==pacmanChar
+						&& characters[i+1][j+1] == pacmanChar){
 						
 						//Vector3 pacPos = new Vector3 (currentX+prefabSize/2f, currentY-prefabSize/2f, 0f);						
 						
                         GameObject pacmanInstance = (GameObject)Instantiate (pacman, entityPosition, Quaternion.identity);
 
-                        PacmanMovement pacmanMovement = pacmanInstance.GetComponent<PacmanMovement>();
-
-                        pacmanMovement.Agent = agent;
-
-                        level.PacmanPosition = place;
-
-                        pacmanMovement.Level = level;
+                        if ( multiAgent)
+                        {
+                            IAgent pacmanAgent = ((MultiAgent)agent).pacmanAgent.copy();
+                            pacmanAgent.gameObject = pacmanInstance;
+                            pacmanAgent.agentPlace = place;
+                            level.PacmanPosition = place;
+                            pacmanInstance.GetComponent<PacmanMovement>().enabled = false;
+                            agentMovements.Insert(0, pacmanAgent);
+                        }
+                        else
+                        {
+                            PacmanMovement pacmanMovement = pacmanInstance.GetComponent<PacmanMovement>();
+                            pacmanMovement.Agent = agent;
+                            level.PacmanPosition = place;
+                            pacmanMovement.Level = level;
+                        }
 						
 					}
 
-                    
+                    if (characters[i][j]         == ghostChar &&
+                        characters[i][j + 1]     == ghostChar && 
+                        characters[i + 1][j]     == ghostChar &&
+                        characters[i + 1][j + 1] == ghostChar   )
+                    {
+
+                        //Vector3 pacPos = new Vector3 (currentX+prefabSize/2f, currentY-prefabSize/2f, 0f);						
+                        GameObject ghost = 
+                            (GameObject)Instantiate(ghosts[getGhostIndex()],
+                            entityPosition, Quaternion.identity);
+
+                        if (multiAgent)
+                        {
+                            IAgent ghostAgent =   ((MultiAgent)agent).ghostAgent.copy();
+                            ghostAgent.agentPlace = place;
+                            ghostAgent.gameObject = ghost;
+                            level.GhostPositions.Add(place);
+                            level.GhostScaredTimes.Add(0);
+                            level.GhostOriginPosition.Add(place);
+                            ghost.GetComponent<GhostMovement>().setLevel(level);
+                            ghost.GetComponent<GhostMovement>().setOrigin(entityPosition);
+                            ghost.GetComponent<GhostMovement>().setOriginPlace(place,level);
+                            ghost.GetComponent<GhostMovement>().setGhostIndex(level.GhostPositions.Count - 1);
+                            ghost.GetComponent<GhostMovement>().setMovement(multiAgentGO.GetComponent<MultiAgentMovement>());
+                            agentMovements.Add(ghostAgent);
+                        }
+                        else
+                        {
+                            /*
+                            PacmanMovement pacmanMovement =
+                            ghost.GetComponent<PacmanMovement>();
+                            pacmanMovement.Agent = new RandomAgent();
+                            pacmanMovement.Level = level;
+                            */
+                        }
+
+                    }
+
+                    if (characters[i][j]         == powerUpChar && 
+                        characters[i][j + 1]     == powerUpChar && 
+                        characters[i + 1][j]     == powerUpChar && 
+                        characters[i + 1][j + 1] == powerUpChar   )
+                    {
+
+                        GameObject powerUpInstance = (GameObject)Instantiate(powerup, entityPosition, Quaternion.identity);
+                        powerUpInstance.GetComponent<Powerup>().setLevel(level);
+                        powerUpInstance.GetComponent<Powerup>().setMultiAgentMovement(multiAgentGO.GetComponent<MultiAgentMovement>());
+                        place.HasPowerUp = true;
+                        level.PowerupPositions.Add(place);
+                        level.PowerUpCount++;
+                    }
 
                     currentX += distance;
 					
@@ -535,6 +638,41 @@ public class LevelGenerator : MonoBehaviour {
 			currentY-=distance;
 			
 		}
+
+        foreach (List<Place> row in level.Board)
+        {
+            foreach (Place place in row)
+            {
+                if (place.HasFood)
+                    level.FoodPositions.Add(place);
+            }
+        }
+
+
+        if (multiAgent)
+        {
+
+            if (multiAgentGO)
+            {
+
+                if( agentMovements[0] is MiniMaxAgent)
+                {
+                    ((MiniMaxAgent)agentMovements[0]).setAgentNumber(agentMovements.Count);
+                }
+
+                if (agentMovements[0] is ExpectiMaxAgent)
+                {
+                    ((ExpectiMaxAgent)agentMovements[0]).setAgentNumber(agentMovements.Count);
+                }
+
+                multiAgentGO.GetComponent<MultiAgentMovement>().setAgents(agentMovements);
+                multiAgentGO.GetComponent<MultiAgentMovement>().Level = level;
+                multiAgentGO.GetComponent<MultiAgentMovement>().enabled = true;
+                multiAgentGO.SetActive(true);
+            }
+        }
+
+        return level;
 		
 		
 	}
@@ -543,62 +681,62 @@ public class LevelGenerator : MonoBehaviour {
 		
 		//WALLS
 		//wall top left corner
-		addPattern( new char[]{'e','%','e','%'}, (GameObject) Resources.Load("prefabs/WCLT", typeof(GameObject)), patterns);
+		addPattern( new char[]{edgeChar,wallChar,edgeChar,wallChar}, (GameObject) Resources.Load("prefabs/WCLT", typeof(GameObject)), patterns);
 		//wall top clear
-		addPattern( new char[]{'e',' ','%','%'}, (GameObject) Resources.Load("prefabs/WTC", typeof(GameObject)), patterns);
+		addPattern( new char[]{edgeChar,emptySpaceChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/WTC", typeof(GameObject)), patterns);
 		//wall top obstacle
-		addPattern( new char[]{'e','%','%','%'}, (GameObject) Resources.Load("prefabs/WTO", typeof(GameObject)), patterns);
+		addPattern( new char[]{edgeChar,wallChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/WTO", typeof(GameObject)), patterns);
 		//wall top right corner
-		addPattern( new char[]{'e','%','%','e'}, (GameObject) Resources.Load("prefabs/WCRT", typeof(GameObject)), patterns);
+		addPattern( new char[]{edgeChar,wallChar,wallChar,edgeChar}, (GameObject) Resources.Load("prefabs/WCRT", typeof(GameObject)), patterns);
 		//wall right clear
-		addPattern( new char[]{'%','%',' ','e'}, (GameObject) Resources.Load("prefabs/WRC", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,emptySpaceChar,edgeChar}, (GameObject) Resources.Load("prefabs/WRC", typeof(GameObject)), patterns);
 		//wall right obstacle
-		addPattern( new char[]{'%','%','%','e'}, (GameObject) Resources.Load("prefabs/WRO", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,wallChar,edgeChar}, (GameObject) Resources.Load("prefabs/WRO", typeof(GameObject)), patterns);
 		//wall bottom right corner
-		addPattern( new char[]{'%','e','%','e'}, (GameObject) Resources.Load("prefabs/WCRB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,edgeChar,wallChar,edgeChar}, (GameObject) Resources.Load("prefabs/WCRB", typeof(GameObject)), patterns);
 		//wall bottom clear
-		addPattern( new char[]{' ','e','%','%'}, (GameObject) Resources.Load("prefabs/WBC", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,edgeChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/WBC", typeof(GameObject)), patterns);
 		//wall bottom obstacle
-		addPattern( new char[]{'%','e','%','%'}, (GameObject) Resources.Load("prefabs/WBO", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,edgeChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/WBO", typeof(GameObject)), patterns);
 		//wall bottom left corner
-		addPattern( new char[]{'%','e','e','%'}, (GameObject) Resources.Load("prefabs/WCLB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,edgeChar,edgeChar,wallChar}, (GameObject) Resources.Load("prefabs/WCLB", typeof(GameObject)), patterns);
 		//wall left clear
-		addPattern( new char[]{'%','%','e',' '}, (GameObject) Resources.Load("prefabs/WLC", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,edgeChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/WLC", typeof(GameObject)), patterns);
 		//wall left obstacle
-		addPattern( new char[]{'%','%','e','%'}, (GameObject) Resources.Load("prefabs/WLO", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,edgeChar,wallChar}, (GameObject) Resources.Load("prefabs/WLO", typeof(GameObject)), patterns);
 		
 		//OBSTACLES
 		//Obstacle top left corner
-		addPattern( new char[]{' ','%',' ','%'}, (GameObject) Resources.Load("prefabs/OCLT", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,wallChar,emptySpaceChar,wallChar}, (GameObject) Resources.Load("prefabs/OCLT", typeof(GameObject)), patterns);
 		//Obstacle top right corner
-		addPattern( new char[]{' ','%','%',' '}, (GameObject) Resources.Load("prefabs/OCRT", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,wallChar,wallChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OCRT", typeof(GameObject)), patterns);
 		//Obstacle bottom left corner
-		addPattern( new char[]{'%',' ',' ','%'}, (GameObject) Resources.Load("prefabs/OCLB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,emptySpaceChar,emptySpaceChar,wallChar}, (GameObject) Resources.Load("prefabs/OCLB", typeof(GameObject)), patterns);
 		//Obstacle bottom right corner
-		addPattern( new char[]{'%',' ','%',' '}, (GameObject) Resources.Load("prefabs/OCRB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,emptySpaceChar,wallChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OCRB", typeof(GameObject)), patterns);
 		//Obstacle top
-		addPattern( new char[]{' ','%',' ',' '}, (GameObject) Resources.Load("prefabs/OT", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,wallChar,emptySpaceChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OT", typeof(GameObject)), patterns);
 		//Obstacle bottom
-		addPattern( new char[]{'%',' ',' ',' '}, (GameObject) Resources.Load("prefabs/OB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,emptySpaceChar,emptySpaceChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OB", typeof(GameObject)), patterns);
 		//Obstacle left
-		addPattern( new char[]{' ',' ',' ','%'}, (GameObject) Resources.Load("prefabs/OL", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,emptySpaceChar,emptySpaceChar,wallChar}, (GameObject) Resources.Load("prefabs/OL", typeof(GameObject)), patterns);
 		//Obstacle right
-		addPattern( new char[]{' ',' ','%',' '}, (GameObject) Resources.Load("prefabs/OR", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,emptySpaceChar,wallChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OR", typeof(GameObject)), patterns);
 		//Obstacle wall vertical
-		addPattern( new char[]{'%','%',' ',' '}, (GameObject) Resources.Load("prefabs/OWV", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,emptySpaceChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OWV", typeof(GameObject)), patterns);
 		//Obstacle wall horizontal
-		addPattern( new char[]{' ',' ','%','%'}, (GameObject) Resources.Load("prefabs/OWH", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,emptySpaceChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/OWH", typeof(GameObject)), patterns);
 		//Obstacle wall top
-		addPattern( new char[]{' ','%','%','%'}, (GameObject) Resources.Load("prefabs/OWT", typeof(GameObject)), patterns);
+		addPattern( new char[]{emptySpaceChar,wallChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/OWT", typeof(GameObject)), patterns);
 		//Obstacle wall bottom
-		addPattern( new char[]{'%',' ','%','%'}, (GameObject) Resources.Load("prefabs/OWB", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,emptySpaceChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/OWB", typeof(GameObject)), patterns);
 		//Obstacle wall left
-		addPattern( new char[]{'%','%',' ','%'}, (GameObject) Resources.Load("prefabs/OWL", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,emptySpaceChar,wallChar}, (GameObject) Resources.Load("prefabs/OWL", typeof(GameObject)), patterns);
 		//Obstacle wall right
-		addPattern( new char[]{'%','%','%',' '}, (GameObject) Resources.Load("prefabs/OWR", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,wallChar,emptySpaceChar}, (GameObject) Resources.Load("prefabs/OWR", typeof(GameObject)), patterns);
 		
 		//EMPTY
-		addPattern( new char[]{'%','%','%','%'}, (GameObject) Resources.Load("prefabs/Empty", typeof(GameObject)), patterns);
+		addPattern( new char[]{wallChar,wallChar,wallChar,wallChar}, (GameObject) Resources.Load("prefabs/Empty", typeof(GameObject)), patterns);
 		
 	}
 	

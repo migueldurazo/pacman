@@ -5,9 +5,26 @@ using System.Text;
 
 namespace Assets.Agents.Search
 {
-    class PacmanSearchState : SearchState
+    public class PacmanSearchState : SearchState
     {
+
         private Level levelAtSomePoint;
+        private List<Action> successors = null;
+        private double value = 0.0;
+        
+
+        public double Value
+        {
+            get
+            {
+                return value;
+            }
+
+            set
+            {
+                this.value = value;
+            }
+        }
 
         public PacmanSearchState( Level level )
         {
@@ -94,14 +111,29 @@ namespace Assets.Agents.Search
         }
 
 
-        public bool updatePacmanPosition(PacmanMovement.Direction direction)
+        public bool updatePacmanPosition(PacmanMovement.Direction direction, Place place)
         {
 
-            return this.levelAtSomePoint.updatePacmanPosition(direction);
+            Place clonedPlace = this.levelAtSomePoint.PacmanPosition.clone(this.levelAtSomePoint);
+
+            Place newPlace = this.levelAtSomePoint.updatePacmanPosition(direction);
+
+            return  newPlace!=null && !newPlace.Equals(clonedPlace);
 
         }
 
-        public override SearchState getSuccessorState(Action action)
+        public bool updateGhostPosition(PacmanMovement.Direction direction, Place place, int index)
+        {
+
+            Place clonedPlace = this.levelAtSomePoint.GhostPositions[index].clone(this.levelAtSomePoint);
+
+            Place newPlace = this.levelAtSomePoint.updateGhostPosition(direction, index, place);
+
+            return newPlace != null && !newPlace.Equals(clonedPlace);
+
+        }
+
+        public SearchState getSuccessorState(Action action, int index)
         {
             PacmanAction pacmanAction = (PacmanAction)action;
             PacmanMovement.Direction dir = (PacmanMovement.Direction)pacmanAction.getAction();
@@ -110,12 +142,56 @@ namespace Assets.Agents.Search
 
             newState.UseHigherPriority = this.UseHigherPriority;
 
-            if( newState.updatePacmanPosition(dir))
+            if (index == 0)
             {
-                return newState;
+
+                if (newState.updatePacmanPosition(dir, levelAtSomePoint.PacmanPosition))
+                {
+                    return newState;
+                }
+
+            }else
+            {
+                if (newState.updateGhostPosition(dir, levelAtSomePoint.GhostPositions[index-1], index-1))
+                {
+                    return newState;
+                }
+
             }
 
             return null;
+
+        }
+
+        public List<Action> getSuccessors( int index )
+        {
+
+            if (successors == null)
+            {
+                successors = new List<Action>();
+            }else
+            {
+                return successors;
+            }
+
+            foreach (PacmanMovement.Direction direction in Enum.GetValues(typeof(PacmanMovement.Direction)))
+            {
+                if (direction == PacmanMovement.Direction.Idle) continue;
+
+                PacmanAction action = new PacmanAction();
+                action.Direction = direction;
+
+                PacmanSearchState successorState =
+                    (PacmanSearchState)this.getSuccessorState(action, index);
+                action.Successor = successorState;
+                if( successorState != null)
+                {
+                    successors.Add(action);
+                }
+
+            }
+
+            return successors;
 
         }
 
@@ -147,6 +223,15 @@ namespace Assets.Agents.Search
         {
             return levelAtSomePoint;
         }
-        
+
+        public double evaluate()
+        {
+            return levelAtSomePoint.getEvaluation();
+        }
+
+        public override SearchState getSuccessorState(Action action)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

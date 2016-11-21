@@ -22,11 +22,7 @@ public class MenuBuilder : MonoBehaviour
             if (file.Extension == ".txt")
             {
 
-                Debug.Log(file.Name);
-
                 string filename = file.Name.Substring(0, file.Name.Length - 4);
-
-                Debug.Log(filename);
 
                 Dropdown.OptionData list = new Dropdown.OptionData(filename);
 

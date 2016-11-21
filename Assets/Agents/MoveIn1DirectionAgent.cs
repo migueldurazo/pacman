@@ -13,8 +13,14 @@ public class MoveIn1DirectionAgent : IAgent {
 
     }
 
-    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
+    public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
         return direction;
     }
+
+    public override IAgent copy()
+    {
+        return new MoveIn1DirectionAgent(this.direction);
+    }
+
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.Agents.Search 
 {
-    class PacmanAction : Action
+    public class PacmanAction : Action
     {
 
         private PacmanMovement.Direction direction;

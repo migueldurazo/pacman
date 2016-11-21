@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.Agents.Search
 {
-    abstract class Action
+    public abstract class Action
     {
         private double cost;
         public double Cost

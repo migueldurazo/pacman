@@ -5,10 +5,10 @@ using System;
 public class ReactionAgent : IAgent
 {
 
-    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
+    public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
 
-        Place originalPlace = pacmanMovement.Level.PacmanPosition;
+        Place originalPlace = place;
 
         foreach (PacmanMovement.Direction direction in Enum.GetValues(typeof(PacmanMovement.Direction)))
         {
@@ -38,6 +38,11 @@ public class ReactionAgent : IAgent
         return PacmanMovement.Direction.Idle;
 
 
+    }
+
+    public override IAgent copy()
+    {
+        return new ReactionAgent();
     }
 
 

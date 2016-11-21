@@ -28,12 +28,12 @@ class SearchAgent : IAgent
 
     bool problemSolved = false;
     List<PacmanMovement.Direction> plan = new List<PacmanMovement.Direction>();
-    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
+    public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
         if(!problemSolved)
         {
 
-            PacmanSearchState startState = new PacmanSearchState(pacmanMovement.Level);
+            PacmanSearchState startState = new PacmanSearchState(level);
 
             PacmanSearchProblem problem = new PacmanSearchProblem(startState);
 
@@ -89,6 +89,11 @@ class SearchAgent : IAgent
 
         return null;
 
+    }
+
+    public override IAgent copy()
+    {
+        return new SearchAgent(this.algorithm);
     }
 
 }

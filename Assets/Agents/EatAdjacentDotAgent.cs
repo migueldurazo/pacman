@@ -19,16 +19,16 @@ public class EatAdjacentDotAgent : IAgent
 
     }
 
-    public PacmanMovement.Direction getDirection(
-        Transform pacman, PacmanMovement pacmanMovement)
+    public override PacmanMovement.Direction getDirection(
+        Level level, Place place)
     {
 
         if (plan.Count == 0)
         {
 
-            Place original = pacmanMovement.Level.PacmanPosition;
+            Place original = place;
 
-            Place current = pacmanMovement.Level.PacmanPosition;
+            Place current = place;
             
             foreach (PacmanMovement.Direction direction in directions)
             {
@@ -77,4 +77,11 @@ public class EatAdjacentDotAgent : IAgent
 
         return PacmanMovement.Direction.Idle;
     }
+
+    public override IAgent copy()
+    {
+        return new EatAdjacentDotAgent();
+    }
+
+    
 }

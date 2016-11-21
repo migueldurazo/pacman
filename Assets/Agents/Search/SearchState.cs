@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.Agents.Search
 {
-    abstract class SearchState : IComparable<SearchState>
+    public abstract class SearchState : IComparable<SearchState>
     {
 
         private List<object> plan = new List<object>();

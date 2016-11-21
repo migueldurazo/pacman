@@ -5,7 +5,7 @@ using System;
 public class HumanAgent : IAgent {
 
   
-    public PacmanMovement.Direction getDirection(Transform pacman, PacmanMovement pacmanMovement)
+    public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
 
         if (Input.GetKey(KeyCode.UpArrow))
@@ -19,6 +19,11 @@ public class HumanAgent : IAgent {
 
         return PacmanMovement.Direction.Idle;
      
+    }
+
+    public override IAgent copy()
+    {
+        return new HumanAgent();
     }
 
 

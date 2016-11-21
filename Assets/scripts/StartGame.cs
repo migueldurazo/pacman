@@ -1,10 +1,42 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class StartGame : MonoBehaviour
 {
-    
+
+    void Update()
+    {
+        if (started)
+        {
+
+            if (Input.GetKeyDown("escape"))
+            {
+                started = false;
+                SceneManager.LoadScene("main");
+            }
+
+
+            time -= Time.deltaTime;
+
+            GameObject.Find("Canvas-time").GetComponent<Text>().text = "Time: " + time.ToString("f0");
+
+            if (time <= 0.0f)
+            {
+                lg.generatedLevel.Timeup = true;
+                lg.generatedLevel.GameOver = true;
+                GameObject.Find("Canvas-time").GetComponent<Text>().text = "Time: 0";
+            }
+
+        }
+
+    }
+
+    public float time;
+    private bool started = false;
+    LevelGenerator lg;
+
     // Use this for initialization
     public void generateLevel()
     {
@@ -13,7 +45,7 @@ public class StartGame : MonoBehaviour
 
         IAgent agent = getAgent();
 
-        LevelGenerator lg = Camera.main.GetComponent<LevelGenerator>();
+        lg = Camera.main.GetComponent<LevelGenerator>();
 
         lg.levelData = getLevelData();
 
@@ -21,7 +53,18 @@ public class StartGame : MonoBehaviour
 
         lg.agent = agent;
 
-        GameObject.Find("MainMenu").GetComponent<Canvas>().gameObject.SetActive(false); 
+        GameObject multiAgentGO = GameObject.Find("Multiagent");
+
+        multiAgentGO.SetActive(false);
+
+        lg.multiAgentGO = multiAgentGO;
+
+        GameObject.Find("MainMenu").GetComponent<Canvas>().gameObject.SetActive(false);
+        GameObject.Find("InGame").GetComponent<Text>().text = ("Score: " + 0 + "\n");
+
+        time = 60;
+
+        started = true;
 
     }
 
@@ -33,31 +76,6 @@ public class StartGame : MonoBehaviour
         TextAsset mytxtData = (TextAsset)Resources.Load("levels/" + levelName);
 
         return mytxtData.text;
-
-
-
-    }
-
-    LevelGenerator.Maze getMaze()
-    {
-        LevelGenerator.Maze maze = LevelGenerator.Maze.Test;
-
-        int selectedMaze = GameObject.Find("MazeDropdown").GetComponent<Dropdown>().value;
-
-        switch (selectedMaze)
-        {
-            case 0:
-                maze = LevelGenerator.Maze.Sample1;
-                break;
-            case 1:
-                maze = LevelGenerator.Maze.Test;
-                break;
-            
-
-        }
-
-        return maze;
-
 
     }
 
@@ -104,6 +122,10 @@ public class StartGame : MonoBehaviour
 
                 return new SearchAgent(algorithm);
 
+            case 5:
+
+                return new MultiAgent(getPacmanAgent(options), new RandomAgent()) ;
+
         }
 
         return new HumanAgent();
@@ -146,6 +168,39 @@ public class StartGame : MonoBehaviour
         }
 
         return SearchAgent.SearchAlgorithm.BFS;
+    }
+
+    IAgent getPacmanAgent(int options)
+    {
+
+        switch (options)
+        {
+            case 0:
+                return new EvaulationAgent();
+            case 1:
+                return new MiniMaxAgent(0, 2, false);
+            case 2:
+                return new MiniMaxAgent(0, 2, true);
+            case 3:
+                return new MiniMaxAgent(0, 3, false);
+            case 4:
+                return new MiniMaxAgent(0, 3, true);
+            case 5:
+                return new MiniMaxAgent(0, 4, false);
+            case 6:
+                return new MiniMaxAgent(0, 4, true);
+            case 7:
+                return new ExpectiMaxAgent(0, 2);
+            case 8:
+                return new ExpectiMaxAgent(0, 3);
+            case 9:
+                return new ExpectiMaxAgent(0, 4);
+            case 10:
+                return new HumanAgent();
+
+        }
+
+        return new EvaulationAgent();
     }
 
 

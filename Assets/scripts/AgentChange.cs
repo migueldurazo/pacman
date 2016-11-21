@@ -7,8 +7,10 @@ public class AgentChange : MonoBehaviour {
     public Dropdown agentDropdown;
     public Dropdown optionsDropdown;
     public Text optionsLabel;
+    public Dropdown optionsDropdown2;
+    public Text optionsLabel2;
 
-	public void setOptions()
+    public void setOptions()
     {
 
         int selected = agentDropdown.value;
@@ -56,6 +58,29 @@ public class AgentChange : MonoBehaviour {
 
                 break;
 
+            case 5:
+                optionsDropdown.gameObject.SetActive(true);
+                optionsLabel.gameObject.SetActive(true);
+
+                optionsLabel.text = "Pacman Agent";
+
+                optionsDropdown.options.Add(new Dropdown.OptionData("Reaction"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax - 2"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax AB - 2"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax - 3"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax Ab - 3"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax - 4"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("MiniMax Ab - 4"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("ExpectiMax - 2"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("ExpectiMax - 3"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("ExpectiMax - 4"));
+                optionsDropdown.options.Add(new Dropdown.OptionData("Human"));
+
+                TempInt = optionsDropdown.value;
+                optionsDropdown.value = optionsDropdown.value + 1;
+                optionsDropdown.value = TempInt;
+
+                break;
 
         }
 
