@@ -12,9 +12,19 @@ public class EvaulationAgent : IAgent
         return new EvaulationAgent();
     }
 
+    List<PacmanMovement.Direction> history = new List<PacmanMovement.Direction>();
+
+    int unblocking = 0;
+
+    PacmanMovement.Direction unblockDirection = PacmanMovement.Direction.Idle;
+
     public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
-
+        if( unblocking > 0)
+        {
+            return unblockDirection;
+            unblocking--;
+        }
         double initialEvaluation = level.getEvaluation();
         double maxScore = 0;
         PacmanMovement.Direction dir = PacmanMovement.Direction.Idle;
@@ -53,9 +63,45 @@ public class EvaulationAgent : IAgent
             
         }
 
-        
+        if( checkHistoryForBlockers())
+        {
+            dir = unblockDirection = history[history.Count - 1];
+            unblocking = 4;
+        }
+
+        history.Add(dir);
 
         return dir;
+
+    }
+
+    private bool checkHistoryForBlockers()
+    {
+        if (history.Count < 2)
+        {
+            return false;
+        }
+
+        PacmanMovement.Direction[] repetition = new PacmanMovement.Direction[2];
+        repetition[0] = history[history.Count - 1];
+        repetition[1] = history[history.Count - 2];
+
+        if( repetition[0] == repetition[1])
+        {
+            return false;
+        }
+        
+        int index = history.Count - 3;
+        for (int i = 0; i < 10 && index>=0; i++, index--)
+        {
+            if( repetition[i%2] != history[index])
+            {
+                return false;
+            }
+        }
+
+        return true;
+
 
     }
 

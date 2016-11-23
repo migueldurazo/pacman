@@ -111,10 +111,10 @@ public class MultiAgentMovement : MonoBehaviour {
                 PacmanMovement.Direction dir = agent.getDirection(level, agent.agentPlace);
                 
                 if (dir == PacmanMovement.Direction.Idle) return;
-                Vector2 directionVector = getDirectionVector(dir);
-                if (valid(dir, directionVector, agent.gameObject.transform)) {
-
-                    destinations[i] = (Vector2)agent.gameObject.transform.position + directionVector;
+                
+                //Place p = agent.agentPlace.getPlaceByMovement(dir);
+                //Vector2 directionVector = p.EntityPosition - agent.agentPlace.EntityPosition;
+             //   if (valid(dir, directionVector, agent.gameObject.transform)) {
 
                     if (agent.gameObject.name.StartsWith("Pacman"))
                     {
@@ -133,9 +133,11 @@ public class MultiAgentMovement : MonoBehaviour {
                         }
                     }
 
-                    
+                destinations[i] = agent.agentPlace.EntityPosition;
 
-                }
+
+
+                //    }
 
             }
 

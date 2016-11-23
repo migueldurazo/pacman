@@ -513,6 +513,7 @@ public class LevelGenerator : MonoBehaviour {
                     place.Level = level;
                     place.X = boardXCoordinate;
                     place.Y = boardYCoordinate++;
+                    place.EntityPosition = entityPosition;
 
                     if (food[i][j] && food[i][j + 1] && food[i + 1][j]
                         && food[i + 1][j + 1] && !foodIsPlaced[i][j] && !foodIsPlaced[i][j + 1]
@@ -538,9 +539,6 @@ public class LevelGenerator : MonoBehaviour {
                         place.Valid = true;
 
                         //Found an empty spot where pacman can be placed
-                        //Use a structure to store pacman position and coordinates, new object required
-
-                        place.PacmanPosition = entityPosition;
 
                     }
 
