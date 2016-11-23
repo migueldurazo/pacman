@@ -46,7 +46,6 @@ public class GhostMovement : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D co)
     {
-        /*
         if (co.name.StartsWith("Pacman"))
         {
 
@@ -64,7 +63,7 @@ public class GhostMovement : MonoBehaviour {
 
             
 
-        }*/
+        }
     }
 
 }

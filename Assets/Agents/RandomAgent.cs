@@ -28,7 +28,7 @@ public class RandomAgent : IAgent
         PacmanMovement.Direction dir = PacmanMovement.Direction.Idle;
 
         do {
-            int value = new System.Random(System.DateTime.Now.Millisecond).Next(0, 99);
+            int value = new System.Random().Next(0,99);
             int max = 0;
             for(int i = 0; i < probabilities.Length; i++)
             {

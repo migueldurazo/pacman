@@ -4,13 +4,26 @@ using System.Collections;
 public class Place
 {
 
+    private Vector3 pacmanPosition;
     private bool valid = false;
     private int x;
     private int y;
     private Level level;
     private bool hasFood = false;
     private bool hasPowerUp = false;
-    private Vector3 entityPosition = Vector3.zero;
+
+    public Vector3 PacmanPosition
+    {
+        get
+        {
+            return pacmanPosition;
+        }
+
+        set
+        {
+            pacmanPosition = value;
+        }
+    }
 
     public bool Valid
     {
@@ -90,19 +103,6 @@ public class Place
         }
     }
 
-    public Vector3 EntityPosition
-    {
-        get
-        {
-            return entityPosition;
-        }
-
-        set
-        {
-            entityPosition = value;
-        }
-    }
-
     public Place getPlaceByMovement( PacmanMovement.Direction direction)
     {
 
@@ -141,7 +141,7 @@ public class Place
         Place newPlace = new Place();
       
         newPlace.HasFood = this.HasFood;
-        newPlace.EntityPosition = this.EntityPosition;
+        newPlace.PacmanPosition = this.PacmanPosition;
         newPlace.Valid = this.Valid;
         newPlace.X = this.X;
         newPlace.Y = this.Y;
