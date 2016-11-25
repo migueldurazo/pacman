@@ -33,7 +33,7 @@ public class Powerup : MonoBehaviour {
     void Update()
     {
 
-        if( level.getTotalScaredTime() == 0)
+        if( multiAgent.Level.getTotalScaredTime() == 0)
         {
             if (audio.activeSelf)
             {

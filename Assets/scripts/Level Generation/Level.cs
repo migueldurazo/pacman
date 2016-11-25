@@ -454,7 +454,7 @@ public class Level  {
                     else
                     {
                         this.score += GHOST_EATEN;
-                        ghostPositions[i] = ghostOriginPosition[i].clone(this);
+                        ghostPositions[i] = ghostOriginPosition[i];
                         ghostScaredTimes[i] = 0;
                     }
 
@@ -503,6 +503,12 @@ public class Level  {
 
         double winUtility = this.win ? 1.0 * WIN_MULTIPLIER : 0.0;
 
+
+        if( this.lose)
+        {
+            int x = 2;
+        }
+
         double loseUtility = this.lose ? 1.0 * LOSE_MULTIPLIER : 0.0;
 
         double foodDistanceUtility = getPacmanDistanceToClosestFood() * CLOSEST_FOOD_MULTIPLIER;
@@ -549,6 +555,7 @@ public class Level  {
     double GHOST_DISTANCE_MULTIPLIER = 0.0;
     double POWERUP_DISTANCE_MULTIPLIER = 0.0;
     double SCARED_GHOST_DISTANCE_MULTIPLIER = 0.0;
+
 
 
 

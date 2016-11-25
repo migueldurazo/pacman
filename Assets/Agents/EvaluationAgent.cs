@@ -22,8 +22,8 @@ public class EvaulationAgent : IAgent
     {
         if( unblocking > 0)
         {
-            return unblockDirection;
             unblocking--;
+            return unblockDirection;
         }
         double initialEvaluation = level.getEvaluation();
         double maxScore = 0;
@@ -66,7 +66,7 @@ public class EvaulationAgent : IAgent
         if( checkHistoryForBlockers())
         {
             dir = unblockDirection = history[history.Count - 1];
-            unblocking = 4;
+            unblocking = 2;
         }
 
         history.Add(dir);
@@ -92,7 +92,7 @@ public class EvaulationAgent : IAgent
         }
         
         int index = history.Count - 3;
-        for (int i = 0; i < 10 && index>=0; i++, index--)
+        for (int i = 0; i < 6 && index>=0; i++, index--)
         {
             if( repetition[i%2] != history[index])
             {
