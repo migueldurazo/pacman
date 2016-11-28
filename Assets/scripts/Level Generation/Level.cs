@@ -259,6 +259,10 @@ public class Level  {
                 {
                     newLevel.foodPositions.Add(clonedPlace);
                 }
+                if( ghostOriginPosition.Contains(p))
+                {
+                    newLevel.ghostOriginPosition.Add(clonedPlace);
+                }
 
                 newRow.Add(clonedPlace);
             }
