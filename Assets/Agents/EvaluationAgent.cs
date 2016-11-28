@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using UnityEngine;
 
 public class EvaulationAgent : IAgent
 {
@@ -17,13 +17,15 @@ public class EvaulationAgent : IAgent
     int unblocking = 0;
 
     PacmanMovement.Direction unblockDirection = PacmanMovement.Direction.Idle;
+    PacmanMovement.Direction[] directions = { PacmanMovement.Direction.Up,
+        PacmanMovement.Direction.Right, PacmanMovement.Direction.Left, PacmanMovement.Direction.Down };
 
     public override PacmanMovement.Direction getDirection(Level level, Place place)
     {
         if( unblocking > 0)
         {
             unblocking--;
-            return unblockDirection;
+            return directions[new System.Random().Next(0, directions.Length )]; ;
         }
         double initialEvaluation = level.getEvaluation();
         double maxScore = 0;
@@ -52,21 +54,23 @@ public class EvaulationAgent : IAgent
 
         validEvaluations = validEvaluations.OrderByDescending(v => v.evaluation).ToList<Evaluation>();
 
-        if( validEvaluations.Count > 0)
+        if (validEvaluations.Count > 0)
         {
 
             maxScore = validEvaluations[0].evaluation;
 
             validEvaluations.RemoveAll(item => item.evaluation < maxScore);
 
-            dir = validEvaluations[new System.Random().Next(0, validEvaluations.Count)].direction;
+            Evaluation chosen = validEvaluations[new System.Random().Next(0, validEvaluations.Count)];
+
+            dir = chosen.direction;
             
         }
 
         if( checkHistoryForBlockers())
         {
             dir = unblockDirection = history[history.Count - 1];
-            unblocking = 2;
+            unblocking = 8;
         }
 
         history.Add(dir);
