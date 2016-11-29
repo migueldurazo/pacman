@@ -544,6 +544,7 @@ public class Level  {
     double SCARED_GHOST_DISTANCE_MULTIPLIER = 0.0;
 
 
+
     public double getPacmanDistanceToClosestFood()
     {
 

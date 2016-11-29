@@ -111,27 +111,46 @@ public class MultiAgentMovement : MonoBehaviour {
                 PacmanMovement.Direction dir = agent.getDirection(level, agent.agentPlace);
                 
                 if (dir == PacmanMovement.Direction.Idle) return;
-                
+
                 //Place p = agent.agentPlace.getPlaceByMovement(dir);
                 //Vector2 directionVector = p.EntityPosition - agent.agentPlace.EntityPosition;
-             //   if (valid(dir, directionVector, agent.gameObject.transform)) {
+                //   if (valid(dir, directionVector, agent.gameObject.transform)) {
 
-                    if (agent.gameObject.name.StartsWith("Pacman"))
+                if (agent.gameObject.name.StartsWith("Pacman"))
+                {
+                    //TODO
+                    //agent.agentPlace = level.updatePacmanPosition( dir );
+                    level.updatePacmanPosition(dir);
+                    GameObject.Find("InGame").GetComponent<Text>().text =
+                    ("Score: " + level.Score + "\n");
+                }
+                else
+                {
+                    //agent.agentPlace = level.updateGhostPosition(dir, i-1, agent.agentPlace);
+                    level.updateGhostPosition(dir, i - 1, agent.agentPlace);
+                    int scaredTimeLeft = level.GhostScaredTimes[i - 1];
+                    if (scaredTimeLeft == 0)
                     {
-                        //TODO
-                        agent.agentPlace = level.updatePacmanPosition( dir );
-                        GameObject.Find("InGame").GetComponent<Text>().text =
-                        ("Score: " + level.Score + "\n");
+                        agent.gameObject.GetComponent<Animator>().SetBool("scared", false);
+                    }
+                }
+
+
+                for (int j = 0; j < agents.Count; j++)
+                {
+
+                    IAgent agentObject = agents[j];
+
+                    if (agentObject.gameObject.name.StartsWith("Pacman"))
+                    {
+                        agentObject.agentPlace = level.PacmanPosition;
                     }
                     else
                     {
-                        agent.agentPlace = level.updateGhostPosition(dir, i-1, agent.agentPlace);
-                        int scaredTimeLeft = level.GhostScaredTimes[i-1];
-                        if( scaredTimeLeft == 0)
-                        {
-                            agent.gameObject.GetComponent<Animator>().SetBool("scared", false);
-                        }
+                        agentObject.agentPlace = level.GhostPositions[j - 1];
                     }
+
+                }
 
                 destinations[i] = agent.agentPlace.EntityPosition;
 
