@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -438,6 +438,8 @@ public class Level  {
 
     private void checkGameOver()
     {
+        if (this.gameOver) return;
+
         for( int i = 0; i < ghostPositions.Count; i++ )
         {
 
@@ -540,6 +542,7 @@ public class Level  {
     double GHOST_DISTANCE_MULTIPLIER = 0.0;
     double POWERUP_DISTANCE_MULTIPLIER = 0.0;
     double SCARED_GHOST_DISTANCE_MULTIPLIER = 0.0;
+
 
     public double getPacmanDistanceToClosestFood()
     {
